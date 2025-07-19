@@ -9,7 +9,7 @@ import {
 
 export default function Home() {
   return (
-    <HStack p="4" bg="red" h="100vh" alignItems="flex-start">
+    <HStack p="4" bg="red" h="100vh" alignItems="flex-start" gap="4">
       <Stack flex="1">
         <Textarea placeholder="Enter your text here" minH="400px" />
         <Button>Make Queen's speech</Button>
