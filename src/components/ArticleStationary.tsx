@@ -22,6 +22,7 @@ export default function ArticleStationary({ content }: ArticleStationaryProps) {
       boxShadow="lg"
       maxW="full"
       fontFamily="monospace"
+      minH="100vh"
     >
       <Stack direction="column" gap={6}>
         {/* Header section for Buckingham Palace logo */}

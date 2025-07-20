@@ -5,8 +5,6 @@ import {
   Box,
   Container,
   Stack,
-  HStack,
-  Heading,
   Text,
   Textarea,
   Button,
@@ -175,121 +173,126 @@ export default function GeneratePage() {
 
   return (
     <Box minH="100vh" py={8}>
-      <Container maxW="6xl" mx="auto">
+      <Container maxW="2xl" mx="auto">
         <Stack gap={6}>
-          {/* Main Content */}
-          <HStack
-            gap={8}
-            align="start"
-            flexWrap={{ base: "wrap", lg: "nowrap" }}
-          >
-            {/* Input Section */}
-            <Box
-              flex="1"
-              bg="white"
-              p={6}
-              borderRadius="lg"
-              shadow="md"
-              minW={{ base: "full", lg: "400px" }}
-            >
-              <Stack gap={4}>
-                <Heading as="h3" size="md">
-                  ✍️ Your Input
-                </Heading>
+          {/* Main Content - Single Column with Overlay */}
+          <Box position="relative" w="full">
+            {/* Default Empty Stationary or Streaming Content */}
+            <Box>
+              {/* Show loading phrase only when loading and no streaming content yet */}
+              {isLoading && !streamingContent && (
+                <ArticleStationary content={loadingPhrase} />
+              )}
 
-                <Textarea
-                  placeholder="Enter your text here to transform it into a Queen Elizabeth II Clickhole article... 
-                    Examples:
-                    - 'I'm starting a new hobby'
-                    - 'My cat won't stop meowing'
-                    - 'I discovered a new restaurant'
-                    - 'I'm learning to cook'"
-                  value={userInput}
-                  onChange={(e) => setUserInput(e.target.value)}
-                  rows={8}
-                  resize="vertical"
-                  maxLength={2000}
-                />
+              {/* Show streaming content as it comes in */}
+              {streamingContent && (
+                <ArticleStationary content={streamingContent} />
+              )}
 
-                <Text fontSize="sm" color="gray.500" textAlign="right">
-                  {userInput.length}/2000 characters
-                </Text>
+              {/* Show final result when streaming is complete */}
+              {result && !isLoading && !streamingContent && (
+                <>
+                  {result.success ? (
+                    <ArticleStationary content={result.article || ""} />
+                  ) : (
+                    <Box
+                      bg="red.50"
+                      border="1px solid"
+                      borderColor="red.200"
+                      p={4}
+                      borderRadius="md"
+                      m={4}
+                    >
+                      <Text color="red.800" fontWeight="bold">
+                        Generation Failed!
+                      </Text>
+                      <Text color="red.700" mt={1}>
+                        {result.error}
+                      </Text>
+                    </Box>
+                  )}
+                </>
+              )}
 
-                <Button
-                  colorScheme="purple"
-                  size="lg"
-                  onClick={handleGenerate}
-                  disabled={!userInput.trim() || isLoading}
-                >
-                  {isLoading ? "Generating..." : "Generate Article"}
-                </Button>
-              </Stack>
+              {/* Show empty stationary by default */}
+              {!result && !isLoading && !streamingContent && (
+                <ArticleStationary content="" />
+              )}
             </Box>
 
-            {/* Results Section */}
-            <Box
-              flex="1"
-              borderRadius="lg"
-              minW={{ base: "full", lg: "400px" }}
-            >
-              <Stack gap={4}>
-                {/* Show loading phrase only when loading and no streaming content yet */}
-                {isLoading && !streamingContent && (
-                  <Box maxH="600px" overflowY="auto">
-                    <ArticleStationary content={loadingPhrase} />
-                  </Box>
-                )}
+            {/* Post-it Note Input Overlay */}
+            {!isLoading && (
+              <Box
+                position="absolute"
+                top="120px"
+                left="60px"
+                zIndex={10}
+                transform="rotate(-1.5deg)"
+                bg="yellow.200"
+                p={4}
+                borderRadius="sm"
+                boxShadow="lg"
+                border="1px solid"
+                borderColor="yellow.300"
+                maxW="300px"
+                _before={{
+                  content: '""',
+                  position: "absolute",
+                  top: "-8px",
+                  left: "50%",
+                  transform: "translateX(-50%)",
+                  width: "40px",
+                  height: "15px",
+                  bg: "yellow.100",
+                  borderRadius: "sm",
+                  border: "1px solid",
+                  borderColor: "yellow.300",
+                }}
+              >
+                <Stack gap={3}>
+                  <Text fontSize="xs" fontWeight="bold" color="gray.700" mb={1}>
+                    ✍️ Note to Her Majesty
+                  </Text>
 
-                {/* Show streaming content as it comes in */}
-                {streamingContent && (
-                  <Box overflowY="auto">
-                    <ArticleStationary content={streamingContent} />
-                  </Box>
-                )}
+                  <Textarea
+                    placeholder="Write your message to the Queen here..."
+                    value={userInput}
+                    onChange={(e) => setUserInput(e.target.value)}
+                    rows={4}
+                    resize="none"
+                    maxLength={2000}
+                    bg="transparent"
+                    border="none"
+                    outline="none"
+                    _focus={{
+                      boxShadow: "none",
+                      border: "none",
+                    }}
+                    fontSize="sm"
+                    fontFamily="cursive"
+                    color="gray.800"
+                  />
 
-                {/* Show final result when streaming is complete */}
-                {result && !isLoading && !streamingContent && (
-                  <>
-                    {result.success ? (
-                      <Box overflowY="auto">
-                        <ArticleStationary content={result.article || ""} />
-                      </Box>
-                    ) : (
-                      <Box
-                        bg="red.50"
-                        border="1px solid"
-                        borderColor="red.200"
-                        p={4}
-                        borderRadius="md"
-                      >
-                        <Text color="red.800" fontWeight="bold">
-                          Generation Failed!
-                        </Text>
-                        <Text color="red.700" mt={1}>
-                          {result.error}
-                        </Text>
-                      </Box>
-                    )}
-                  </>
-                )}
+                  <Text fontSize="xs" color="gray.500" textAlign="right">
+                    {userInput.length}/2000
+                  </Text>
 
-                {/* Show placeholder when nothing is happening */}
-                {!result && !isLoading && !streamingContent && (
-                  <Box textAlign="center" py={8} color="gray.500">
-                    <Text>Your generated article will appear here</Text>
-                    <Text fontSize="sm" mt={2}>
-                      Enter some text and click &quot;Generate Article&quot; to
-                      begin
-                    </Text>
-                  </Box>
-                )}
-              </Stack>
-            </Box>
-          </HStack>
+                  <Button
+                    colorScheme="purple"
+                    size="sm"
+                    onClick={handleGenerate}
+                    disabled={!userInput.trim() || isLoading}
+                    borderRadius="sm"
+                  >
+                    Send to the Queen 👑
+                  </Button>
+                </Stack>
+              </Box>
+            )}
+          </Box>
 
-          {/* Instructions */}
+          {/* Reference Info at Bottom */}
           <Stack gap={4}>
-            {/* Reference Info */}
             {result &&
               result.usedReferences &&
               result.usedReferences.length > 0 && (
