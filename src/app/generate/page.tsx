@@ -29,6 +29,8 @@ export default function GeneratePage() {
   const [result, setResult] = useState<GenerationResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [loadingPhrase, setLoadingPhrase] = useState("");
+  const [streamingContent, setStreamingContent] = useState("");
+  const [streamingTitle, setStreamingTitle] = useState("");
 
   const loadingPhrases = [
     "thinkimg...",
@@ -84,6 +86,8 @@ export default function GeneratePage() {
 
     setIsLoading(true);
     setResult(null);
+    setStreamingContent("");
+    setStreamingTitle("");
 
     // Select a random loading phrase
     const randomPhrase =
@@ -101,9 +105,65 @@ export default function GeneratePage() {
         }),
       });
 
-      const data = await response.json();
-      setResult(data);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      // Handle streaming response
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let usedReferences: Array<{ title: string; filename: string }> = [];
+      let accumulatedTitle = "";
+      let accumulatedContent = "";
+
+      if (!reader) {
+        throw new Error("Response body is not readable");
+      }
+
+      while (true) {
+        const { done, value } = await reader.read();
+
+        if (done) break;
+
+        const chunk = decoder.decode(value);
+        const lines = chunk.split("\n");
+
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            try {
+              const data = JSON.parse(line.slice(6));
+              console.log("Received data:", data);
+
+              if (data.type === "metadata") {
+                usedReferences = data.usedReferences;
+              } else if (data.type === "title") {
+                accumulatedTitle = data.chunk;
+                setStreamingTitle(data.chunk);
+              } else if (data.type === "content") {
+                accumulatedContent += data.chunk;
+                setStreamingContent(accumulatedContent);
+              } else if (data.type === "complete") {
+                // Streaming complete
+                setResult({
+                  success: true,
+                  title: accumulatedTitle,
+                  article: accumulatedContent,
+                  usedReferences: usedReferences,
+                });
+              } else if (data.type === "error") {
+                setResult({
+                  success: false,
+                  error: data.error,
+                });
+              }
+            } catch (parseError) {
+              console.error("Error parsing SSE data:", parseError);
+            }
+          }
+        }
+      }
     } catch (error) {
+      console.error("API Error:", error);
       setResult({
         success: false,
         error: "Failed to connect to the API. Please try again.",
@@ -117,17 +177,6 @@ export default function GeneratePage() {
     <Box minH="100vh" py={8}>
       <Container maxW="6xl" mx="auto">
         <Stack gap={6}>
-          {/* Header */}
-          <Box textAlign="center">
-            <Heading as="h1" size="2xl" mb={2} color="purple.600">
-              👑 Queen&apos;s Speech Generator
-            </Heading>
-            <Text fontSize="lg" color="gray.600">
-              Transform your writing into absurd Queen Elizabeth II Clickhole
-              articles
-            </Text>
-          </Box>
-
           {/* Main Content */}
           <HStack
             gap={8}
@@ -184,23 +233,27 @@ export default function GeneratePage() {
               minW={{ base: "full", lg: "400px" }}
             >
               <Stack gap={4}>
-                {isLoading && (
+                {/* Show loading phrase only when loading and no streaming content yet */}
+                {isLoading && !streamingContent && (
                   <Box maxH="600px" overflowY="auto">
-                    <ArticleStationary
-                      content={isLoading ? loadingPhrase : ""}
-                    />
+                    <ArticleStationary content={loadingPhrase} />
                   </Box>
                 )}
 
-                {result && !isLoading && (
+                {/* Show streaming content as it comes in */}
+                {streamingContent && (
+                  <Box overflowY="auto">
+                    <ArticleStationary content={streamingContent} />
+                  </Box>
+                )}
+
+                {/* Show final result when streaming is complete */}
+                {result && !isLoading && !streamingContent && (
                   <>
                     {result.success ? (
-                      <Stack gap={4}>
-                        {/* Generated Article */}
-                        <Box overflowY="auto">
-                          <ArticleStationary content={result.article || ""} />
-                        </Box>
-                      </Stack>
+                      <Box overflowY="auto">
+                        <ArticleStationary content={result.article || ""} />
+                      </Box>
                     ) : (
                       <Box
                         bg="red.50"
@@ -220,7 +273,8 @@ export default function GeneratePage() {
                   </>
                 )}
 
-                {!result && !isLoading && (
+                {/* Show placeholder when nothing is happening */}
+                {!result && !isLoading && !streamingContent && (
                   <Box textAlign="center" py={8} color="gray.500">
                     <Text>Your generated article will appear here</Text>
                     <Text fontSize="sm" mt={2}>

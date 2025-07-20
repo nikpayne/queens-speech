@@ -42,25 +42,71 @@ export async function POST(request: NextRequest) {
     // Pick relevant references based on user input
     const relevantReferences = pickRelevantReferences(userInput, allReferences, 2);
 
-    // Generate the article
-    const generatedResult = await generateQueenElizabethClickhole({
-      userInput,
-      references: relevantReferences,
+    // Create a readable stream for the response
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        try {
+          // Send initial metadata
+          const metadata = {
+            type: 'metadata',
+            usedReferences: relevantReferences.map(ref => ({
+              title: ref.title,
+              filename: ref.filename
+            }))
+          };
+          console.log('Sending metadata:', metadata);
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(metadata)}\n\n`));
+
+          // Generate the article with streaming
+          await generateQueenElizabethClickhole({
+            userInput,
+            references: relevantReferences,
+            onChunk: (chunk: string, isTitle: boolean) => {
+              const data = {
+                type: isTitle ? 'title' : 'content',
+                chunk: chunk
+              };
+              console.log('Sending chunk:', data);
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
+            }
+          });
+
+          // Send completion signal
+          console.log('Sending completion signal');
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ type: 'complete' })}\n\n`));
+          controller.close();
+        } catch (error) {
+          console.error('Streaming error:', error);
+          const errorData = {
+            type: 'error',
+            error: error instanceof Error ? error.message : 'An unexpected error occurred'
+          };
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(errorData)}\n\n`));
+          controller.close();
+        }
+      }
     });
 
-    return NextResponse.json({
-      success: true,
-      title: generatedResult.title,
-      article: generatedResult.body,
-      usedReferences: relevantReferences.map(ref => ({
-        title: ref.title,
-        filename: ref.filename
-      }))
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
     });
 
   } catch (error) {
     console.error('Generation error:', error);
     
+    // Log detailed error information
+    if (error instanceof Error) {
+      console.error('Error message:', error.message);
+      console.error('Stack trace:', error.stack);
+    } else {
+      console.error('Unexpected error type:', error);
+    }
+
     return NextResponse.json(
       { 
         error: error instanceof Error ? error.message : 'An unexpected error occurred',
