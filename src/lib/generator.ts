@@ -42,13 +42,14 @@ USER INPUT TO TRANSFORM:
 WRITING SAMPLES:
 ${referencesText}
 
-Please return your response in the following JSON format:
-{
-  "title": "Your clickhole-style title here",
-  "body": "The complete article body here"
-}
+Write a complete Clickhole-style article. Start with the title on the first line, then a blank line, then the article body. Do not use any JSON formatting, quotes, or special characters around the title or body. Just write the title and article naturally.
 
-Make sure the title is catchy and in Clickhole style, and the body is the full article content.`;
+Example format:
+My Amazing Title Here
+
+This is the article body content that follows...
+
+Now write your article:`;
 
   try {
     const response = await anthropic.messages.create({
@@ -65,25 +66,41 @@ Make sure the title is catchy and in Clickhole style, and the body is the full a
 
     const content = response.content[0];
     if (content.type === 'text') {
-      try {
-        const parsed = JSON.parse(content.text);
+      const responseText = content.text.trim();
+      
+      // Split the response into lines
+      const lines = responseText.split('\n');
+      
+      // Find the first non-empty line as the title
+      let titleIndex = 0;
+      while (titleIndex < lines.length && lines[titleIndex].trim() === '') {
+        titleIndex++;
+      }
+      
+      if (titleIndex >= lines.length) {
+        // No content found, return fallback
         return {
-          title: parsed.title || "Untitled Article",
-          body: parsed.body || content.text
-        };
-      } catch (parseError) {
-        // If JSON parsing fails, try to extract title and body manually
-        const text = content.text;
-        const lines = text.split('\n');
-        const titleLine = lines.find(line => line.trim().length > 0);
-        const bodyStartIndex = lines.findIndex(line => line.trim().length > 0) + 1;
-        const body = lines.slice(bodyStartIndex).join('\n').trim();
-        
-        return {
-          title: titleLine?.trim() || "Generated Article",
-          body: body || text
+          title: "Generated Article",
+          body: responseText
         };
       }
+      
+      const title = lines[titleIndex].trim();
+      
+      // Find the start of the body (skip empty lines after title)
+      let bodyStartIndex = titleIndex + 1;
+      while (bodyStartIndex < lines.length && lines[bodyStartIndex].trim() === '') {
+        bodyStartIndex++;
+      }
+      
+      // Join the remaining lines as the body
+      const bodyLines = lines.slice(bodyStartIndex);
+      const body = bodyLines.join('\n').trim();
+      
+      return {
+        title: title || "Generated Article",
+        body: body || "Article content not found"
+      };
     } else {
       throw new Error('Unexpected response type from Anthropic API');
     }

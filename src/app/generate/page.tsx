@@ -10,8 +10,8 @@ import {
   Text,
   Textarea,
   Button,
-  Spinner,
 } from "@chakra-ui/react";
+import ArticleStationary from "@/components/ArticleStationary";
 
 interface GenerationResult {
   success: boolean;
@@ -28,6 +28,50 @@ export default function GeneratePage() {
   const [userInput, setUserInput] = useState("");
   const [result, setResult] = useState<GenerationResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingPhrase, setLoadingPhrase] = useState("");
+
+  const loadingPhrases = [
+    "thinkimg...",
+    "bloggin in",
+    "computering",
+    "writyng",
+    "procesiing thoughnt",
+    "cramfting wrdos",
+    "brain workign",
+    "typyng away",
+    "composering",
+    "wordsmithing",
+    "creafting blogg",
+    "assemblyng thoughnt",
+    "writyng magesty",
+    "bloggin royaly",
+    "computler thinkimg",
+    "crafyng sentance",
+    "processyng wrdos",
+    "royaly typyng",
+    "bloggin awya",
+    "finishyng upp",
+    "assemblyng the wrdos togethre",
+    "cramfting",
+    "royaly processyng blogg contrent",
+    "thinkimg very hardley",
+    "writyng upp storys",
+    "computler wokring magicaly",
+    "bloggin",
+    "creafting delightfull sentances",
+    "processyng",
+    "typyng away furiosly",
+    "computering the thoughnts",
+    "writyng royaly magnificennt bloggs",
+    "bloggin magesty",
+    "assemblyng wrdos into sentances",
+    "creafting",
+    "royaly thinkimg aboutt thingss",
+    "computler processyng wrdos",
+    "writyng upp delightfull contrent",
+    "bloggin away magnificentlty",
+    "finishyng upp the writyng",
+  ];
 
   const handleGenerate = async () => {
     if (!userInput.trim()) {
@@ -40,6 +84,11 @@ export default function GeneratePage() {
 
     setIsLoading(true);
     setResult(null);
+
+    // Select a random loading phrase
+    const randomPhrase =
+      loadingPhrases[Math.floor(Math.random() * loadingPhrases.length)];
+    setLoadingPhrase(randomPhrase);
 
     try {
       const response = await fetch("/api/generate", {
@@ -65,8 +114,8 @@ export default function GeneratePage() {
   };
 
   return (
-    <Box minH="100vh" py={8} bg="gray.50">
-      <Container maxW="7xl">
+    <Box minH="100vh" py={8}>
+      <Container maxW="6xl" mx="auto">
         <Stack gap={6}>
           {/* Header */}
           <Box textAlign="center">
@@ -101,12 +150,11 @@ export default function GeneratePage() {
 
                 <Textarea
                   placeholder="Enter your text here to transform it into a Queen Elizabeth II Clickhole article... 
-
-Examples:
-- 'I'm starting a new hobby'
-- 'My cat won't stop meowing'
-- 'I discovered a new restaurant'
-- 'I'm learning to cook'"
+                    Examples:
+                    - 'I'm starting a new hobby'
+                    - 'My cat won't stop meowing'
+                    - 'I discovered a new restaurant'
+                    - 'I'm learning to cook'"
                   value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
                   rows={8}
@@ -144,11 +192,8 @@ Examples:
                 </Heading>
 
                 {isLoading && (
-                  <Box textAlign="center" py={8}>
-                    <Spinner size="xl" color="purple.500" />
-                    <Text mt={4} color="gray.600">
-                      Her Majesty is crafting your article...
-                    </Text>
+                  <Box maxH="600px" overflowY="auto">
+                    <ArticleStationary content={loadingPhrase} />
                   </Box>
                 )}
 
@@ -184,38 +229,8 @@ Examples:
                         <Box h="1px" bg="gray.200" />
 
                         {/* Generated Article */}
-                        <Box
-                          p={4}
-                          bg="gray.50"
-                          borderRadius="md"
-                          borderLeft="4px solid"
-                          borderLeftColor="purple.500"
-                          maxH="600px"
-                          overflowY="auto"
-                        >
-                          {/* Article Title */}
-                          {result.title && (
-                            <Heading
-                              as="h2"
-                              size="lg"
-                              mb={4}
-                              color="purple.600"
-                              fontFamily="serif"
-                              lineHeight="1.3"
-                            >
-                              {result.title}
-                            </Heading>
-                          )}
-
-                          {/* Article Body */}
-                          <Text
-                            whiteSpace="pre-wrap"
-                            fontSize="sm"
-                            lineHeight="1.6"
-                            fontFamily="serif"
-                          >
-                            {result.article}
-                          </Text>
+                        <Box maxH="600px" overflowY="auto">
+                          <ArticleStationary content={result.article || ""} />
                         </Box>
                       </Stack>
                     ) : (
