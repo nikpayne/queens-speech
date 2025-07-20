@@ -15,6 +15,7 @@ import {
 
 interface GenerationResult {
   success: boolean;
+  title?: string;
   article?: string;
   usedReferences?: Array<{
     title: string;
@@ -25,9 +26,6 @@ interface GenerationResult {
 
 export default function GeneratePage() {
   const [userInput, setUserInput] = useState("");
-  const [tone, setTone] = useState<"absurd" | "dignified" | "scandalous">(
-    "absurd"
-  );
   const [result, setResult] = useState<GenerationResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -51,7 +49,6 @@ export default function GeneratePage() {
         },
         body: JSON.stringify({
           userInput: userInput.trim(),
-          tone,
         }),
       });
 
@@ -65,12 +62,6 @@ export default function GeneratePage() {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const toneDescriptions = {
-    absurd: "Completely ridiculous and over-the-top scenarios",
-    dignified: "Maintains royal dignity while being satirical",
-    scandalous: "Shocking revelations and palace drama",
   };
 
   return (
@@ -126,38 +117,6 @@ Examples:
                 <Text fontSize="sm" color="gray.500" textAlign="right">
                   {userInput.length}/2000 characters
                 </Text>
-
-                <Box>
-                  <Text mb={2} fontWeight="semibold">
-                    Tone Style:
-                  </Text>
-                  <select
-                    value={tone}
-                    onChange={(e) =>
-                      setTone(
-                        e.target.value as "absurd" | "dignified" | "scandalous"
-                      )
-                    }
-                    style={{
-                      padding: "8px",
-                      borderRadius: "6px",
-                      border: "1px solid #D1D5DB",
-                      backgroundColor: "white",
-                      width: "100%",
-                      fontSize: "14px",
-                    }}
-                  >
-                    <option value="absurd">
-                      🤡 Absurd - {toneDescriptions.absurd}
-                    </option>
-                    <option value="dignified">
-                      👑 Dignified - {toneDescriptions.dignified}
-                    </option>
-                    <option value="scandalous">
-                      🫖 Scandalous - {toneDescriptions.scandalous}
-                    </option>
-                  </select>
-                </Box>
 
                 <Button
                   colorScheme="purple"
@@ -234,6 +193,21 @@ Examples:
                           maxH="600px"
                           overflowY="auto"
                         >
+                          {/* Article Title */}
+                          {result.title && (
+                            <Heading
+                              as="h2"
+                              size="lg"
+                              mb={4}
+                              color="purple.600"
+                              fontFamily="serif"
+                              lineHeight="1.3"
+                            >
+                              {result.title}
+                            </Heading>
+                          )}
+
+                          {/* Article Body */}
                           <Text
                             whiteSpace="pre-wrap"
                             fontSize="sm"
@@ -286,16 +260,15 @@ Examples:
                 1. Enter any text or idea in the input box (up to 2000
                 characters)
               </Text>
-              <Text>2. Choose your preferred tone style</Text>
               <Text>
-                3. Click &quot;Generate Article&quot; to transform your input
+                2. Click &quot;Generate Article&quot; to transform your input
               </Text>
               <Text>
-                4. The AI will create a satirical Queen Elizabeth II
+                3. The AI will create a satirical Queen Elizabeth II
                 Clickhole-style article
               </Text>
               <Text>
-                5. Reference articles are automatically selected to match your
+                4. Reference articles are automatically selected to match your
                 input&apos;s style
               </Text>
             </Stack>

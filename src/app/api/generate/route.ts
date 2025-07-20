@@ -5,7 +5,7 @@ import { getAllReferences, pickRelevantReferences } from '@/lib/referencePicker'
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userInput, tone = 'absurd' } = body;
+    const { userInput } = body;
 
     if (!userInput || typeof userInput !== 'string') {
       return NextResponse.json(
@@ -43,15 +43,15 @@ export async function POST(request: NextRequest) {
     const relevantReferences = pickRelevantReferences(userInput, allReferences, 2);
 
     // Generate the article
-    const generatedArticle = await generateQueenElizabethClickhole({
+    const generatedResult = await generateQueenElizabethClickhole({
       userInput,
       references: relevantReferences,
-      tone
     });
 
     return NextResponse.json({
       success: true,
-      article: generatedArticle,
+      title: generatedResult.title,
+      article: generatedResult.body,
       usedReferences: relevantReferences.map(ref => ({
         title: ref.title,
         filename: ref.filename

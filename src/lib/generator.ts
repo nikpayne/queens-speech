@@ -10,9 +10,14 @@ interface GenerationRequest {
   references: ReferenceArticle[];
 }
 
+interface GenerationResult {
+  title: string;
+  body: string;
+}
+
 export async function generateQueenElizabethClickhole(
   request: GenerationRequest
-): Promise<string> {
+): Promise<GenerationResult> {
   const { userInput, references } = request;
 
   const referencesText = references.map((ref, index) => {
@@ -24,7 +29,6 @@ Content: ${ref.content.substring(0, 1000)}...
 
 `;
   }).join('');
-
 
 const prompt = 
 
@@ -38,8 +42,13 @@ USER INPUT TO TRANSFORM:
 WRITING SAMPLES:
 ${referencesText}
 
+Please return your response in the following JSON format:
+{
+  "title": "Your clickhole-style title here",
+  "body": "The complete article body here"
+}
 
-Write the complete article now:`;
+Make sure the title is catchy and in Clickhole style, and the body is the full article content.`;
 
   try {
     const response = await anthropic.messages.create({
@@ -56,7 +65,25 @@ Write the complete article now:`;
 
     const content = response.content[0];
     if (content.type === 'text') {
-      return content.text;
+      try {
+        const parsed = JSON.parse(content.text);
+        return {
+          title: parsed.title || "Untitled Article",
+          body: parsed.body || content.text
+        };
+      } catch (parseError) {
+        // If JSON parsing fails, try to extract title and body manually
+        const text = content.text;
+        const lines = text.split('\n');
+        const titleLine = lines.find(line => line.trim().length > 0);
+        const bodyStartIndex = lines.findIndex(line => line.trim().length > 0) + 1;
+        const body = lines.slice(bodyStartIndex).join('\n').trim();
+        
+        return {
+          title: titleLine?.trim() || "Generated Article",
+          body: body || text
+        };
+      }
     } else {
       throw new Error('Unexpected response type from Anthropic API');
     }
