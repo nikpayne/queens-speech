@@ -180,20 +180,15 @@ export default function GeneratePage() {
             {/* Results Section */}
             <Box
               flex="1"
-              bg="white"
-              p={6}
               borderRadius="lg"
-              shadow="md"
               minW={{ base: "full", lg: "400px" }}
             >
               <Stack gap={4}>
-                <Heading as="h3" size="md">
-                  📰 Generated Article
-                </Heading>
-
                 {isLoading && (
                   <Box maxH="600px" overflowY="auto">
-                    <ArticleStationary content={loadingPhrase} />
+                    <ArticleStationary
+                      content={isLoading ? loadingPhrase : ""}
+                    />
                   </Box>
                 )}
 
@@ -201,35 +196,8 @@ export default function GeneratePage() {
                   <>
                     {result.success ? (
                       <Stack gap={4}>
-                        {/* Reference Info */}
-                        {result.usedReferences &&
-                          result.usedReferences.length > 0 && (
-                            <Box>
-                              <Text fontSize="sm" fontWeight="semibold" mb={2}>
-                                📚 Style References Used:
-                              </Text>
-                              <Stack direction="row" gap={2} flexWrap="wrap">
-                                {result.usedReferences.map((ref, index) => (
-                                  <Box
-                                    key={index}
-                                    bg="purple.100"
-                                    color="purple.800"
-                                    px={2}
-                                    py={1}
-                                    borderRadius="md"
-                                    fontSize="xs"
-                                  >
-                                    {ref.filename}
-                                  </Box>
-                                ))}
-                              </Stack>
-                            </Box>
-                          )}
-
-                        <Box h="1px" bg="gray.200" />
-
                         {/* Generated Article */}
-                        <Box maxH="600px" overflowY="auto">
+                        <Box overflowY="auto">
                           <ArticleStationary content={result.article || ""} />
                         </Box>
                       </Stack>
@@ -266,28 +234,33 @@ export default function GeneratePage() {
           </HStack>
 
           {/* Instructions */}
-          <Box bg="white" p={6} borderRadius="lg" shadow="md">
-            <Heading as="h4" size="sm" mb={3}>
-              💡 How to Use
-            </Heading>
-            <Stack gap={2} fontSize="sm" color="gray.600">
-              <Text>
-                1. Enter any text or idea in the input box (up to 2000
-                characters)
-              </Text>
-              <Text>
-                2. Click &quot;Generate Article&quot; to transform your input
-              </Text>
-              <Text>
-                3. The AI will create a satirical Queen Elizabeth II
-                Clickhole-style article
-              </Text>
-              <Text>
-                4. Reference articles are automatically selected to match your
-                input&apos;s style
-              </Text>
-            </Stack>
-          </Box>
+          <Stack gap={4}>
+            {/* Reference Info */}
+            {result &&
+              result.usedReferences &&
+              result.usedReferences.length > 0 && (
+                <Box>
+                  <Text fontSize="sm" fontWeight="semibold" mb={2}>
+                    📚 Style References Used:
+                  </Text>
+                  <Stack direction="row" gap={2} flexWrap="wrap">
+                    {result.usedReferences.map((ref, index) => (
+                      <Box
+                        key={index}
+                        bg="purple.100"
+                        color="purple.800"
+                        px={2}
+                        py={1}
+                        borderRadius="md"
+                        fontSize="xs"
+                      >
+                        {ref.filename}
+                      </Box>
+                    ))}
+                  </Stack>
+                </Box>
+              )}
+          </Stack>
         </Stack>
       </Container>
     </Box>
