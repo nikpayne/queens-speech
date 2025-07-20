@@ -9,7 +9,7 @@ import {
   Textarea,
   Button,
 } from "@chakra-ui/react";
-import ArticleStationary from "@/components/ArticleStationary";
+import DesktopWindow from "@/components/DesktopWindow";
 
 interface GenerationResult {
   success: boolean;
@@ -136,18 +136,32 @@ export default function Home() {
                 usedReferences = data.usedReferences;
               } else if (data.type === "title") {
                 accumulatedTitle = data.chunk;
+                console.log("Setting accumulatedTitle to:", accumulatedTitle);
                 setStreamingTitle(data.chunk);
               } else if (data.type === "content") {
                 accumulatedContent += data.chunk;
                 setStreamingContent(accumulatedContent);
               } else if (data.type === "complete") {
                 // Streaming complete
-                setResult({
+                console.log(
+                  "Streaming complete! accumulatedTitle:",
+                  accumulatedTitle
+                );
+                console.log(
+                  "Streaming complete! accumulatedContent length:",
+                  accumulatedContent.length
+                );
+                const finalResult = {
                   success: true,
                   title: accumulatedTitle,
                   article: accumulatedContent,
                   usedReferences: usedReferences,
-                });
+                };
+                console.log("Setting result to:", finalResult);
+                setResult(finalResult);
+                // Clear streaming content so final result shows
+                setStreamingContent("");
+                setStreamingTitle("");
               } else if (data.type === "error") {
                 setResult({
                   success: false,
@@ -181,19 +195,23 @@ export default function Home() {
             <Box>
               {/* Show loading phrase only when loading and no streaming content yet */}
               {isLoading && !streamingContent && (
-                <ArticleStationary content={loadingPhrase} />
+                <DesktopWindow content={loadingPhrase} />
               )}
 
               {/* Show streaming content as it comes in */}
-              {streamingContent && (
-                <ArticleStationary content={streamingContent} />
-              )}
+              {streamingContent && <DesktopWindow content={streamingContent} />}
 
               {/* Show final result when streaming is complete */}
               {result && !isLoading && !streamingContent && (
                 <>
                   {result.success ? (
-                    <ArticleStationary content={result.article || ""} />
+                    <>
+                      {console.log("Final result title:", result.title)}
+                      <DesktopWindow
+                        title={result.title || ""}
+                        content={result.article || ""}
+                      />
+                    </>
                   ) : (
                     <Box
                       bg="red.50"
@@ -216,7 +234,7 @@ export default function Home() {
 
               {/* Show empty stationary by default */}
               {!result && !isLoading && !streamingContent && (
-                <ArticleStationary content="" />
+                <DesktopWindow content="" />
               )}
             </Box>
 

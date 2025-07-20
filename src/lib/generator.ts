@@ -81,8 +81,11 @@ Now write your article:`;
           if (isParsingTitle) {
             // Check if we've hit a newline (end of title)
             const newlineIndex = fullContent.indexOf('\n');
+            console.log('Parsing title, fullContent so far:', JSON.stringify(fullContent));
+            console.log('Looking for newline, index:', newlineIndex);
             if (newlineIndex !== -1) {
               title = fullContent.substring(0, newlineIndex).trim();
+              console.log('Found title:', JSON.stringify(title));
               onChunk(title, true); // Send title
               
               // Start parsing body
@@ -91,6 +94,7 @@ Now write your article:`;
               
               // Send any body content we already have
               if (body.trim()) {
+                console.log('Sending initial body content:', JSON.stringify(body));
                 onChunk(body, false);
               }
             }

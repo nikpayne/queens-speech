@@ -5,14 +5,6 @@ interface ArticleStationaryProps {
 }
 
 export default function ArticleStationary({ content }: ArticleStationaryProps) {
-  // Get today's date formatted nicely
-  const today = new Date();
-  const formattedDate = today.toLocaleDateString("en-GB", {
-    day: "2-digit",
-    month: "long",
-    year: "numeric",
-  });
-
   return (
     <Box
       bg="#FCFCF1"
@@ -43,18 +35,6 @@ export default function ArticleStationary({ content }: ArticleStationaryProps) {
           </Box>
         </Box>
 
-        {/* Date section */}
-        <Box textAlign="right">
-          <Text
-            fontFamily="monospace"
-            fontSize="sm"
-            color="gray.700"
-            letterSpacing="0.02em"
-          >
-            {formattedDate}
-          </Text>
-        </Box>
-
         {/* Article content */}
         <Box>
           <Text
@@ -63,7 +43,6 @@ export default function ArticleStationary({ content }: ArticleStationaryProps) {
             lineHeight="1.8"
             whiteSpace="pre-wrap"
             color="gray.800"
-            letterSpacing="0.02em"
           >
             {content}
           </Text>
