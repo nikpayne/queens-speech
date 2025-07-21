@@ -60,10 +60,13 @@ export default function MemoNotepad({
               boxShadow: "none",
               border: "none",
             }}
-            fontFamily="'La Belle Aurore', serif"
-            color="gray.800"
+            fontFamily="'Beth Ellen', 'La Belle Aurore', serif"
+            _placeholder={{
+              color: "gray.400",
+            }}
+            color="gray.700"
             lineHeight="1.5"
-            fontSize="lg"
+            fontSize="md"
             p={0}
             pt={1}
           />

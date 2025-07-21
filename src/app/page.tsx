@@ -247,22 +247,6 @@ export default function Home() {
                 onGenerate={handleGenerate}
                 isLoading={isLoading}
               />
-
-              {/* Fountain Pen */}
-              {/* <Box
-                display={{ base: "none", md: "block" }}
-                alignSelf="flex-start"
-                pt={8}
-              >
-                <Image
-                  src="/fountain-pen.png"
-                  alt="Fountain Pen"
-                  h="400px"
-                  w="auto"
-                  objectFit="contain"
-                  filter="drop-shadow(2px 2px 4px rgba(0,0,0,0.1))"
-                />
-              </Box> */}
             </HStack>
 
             {/* Desktop Window - Right Side */}
