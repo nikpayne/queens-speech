@@ -5,6 +5,7 @@ import { Box, Image, Container, Stack, Text, HStack } from "@chakra-ui/react";
 import DesktopWindow from "@/components/DesktopWindow";
 import MemoNotepad from "@/components/MemoNotepad";
 import Toast from "@/components/Toast";
+import ArticleStationary from "@/components/ArticleStationary";
 import {
   saveGeneration,
   getGenerationHistory,
@@ -253,12 +254,14 @@ export default function Home() {
             <Box flex="1" minW="600px">
               {/* Show loading phrase only when loading and no streaming content yet */}
               {isLoading && !streamingContent && (
-                <DesktopWindow content={loadingPhrase} onCopy={handleCopy} />
+                // <DesktopWindow content={loadingPhrase} onCopy={handleCopy} />
+                <ArticleStationary content={streamingContent} />
               )}
 
               {/* Show streaming content as it comes in */}
               {streamingContent && (
-                <DesktopWindow content={streamingContent} onCopy={handleCopy} />
+                // <DesktopWindow content={streamingContent} onCopy={handleCopy} />
+                <ArticleStationary content={streamingContent} />
               )}
 
               {/* Show final result when streaming is complete */}
@@ -266,11 +269,12 @@ export default function Home() {
                 <>
                   {result.success ? (
                     <>
-                      <DesktopWindow
+                      {/* <DesktopWindow
                         title={result.title || ""}
                         content={result.article || ""}
                         onCopy={handleCopy}
-                      />
+                      />  */}
+                      <ArticleStationary content={result.article || ""} />
                     </>
                   ) : (
                     <Box
@@ -294,7 +298,8 @@ export default function Home() {
 
               {/* Show empty stationary by default */}
               {!result && !isLoading && !streamingContent && (
-                <DesktopWindow content="" onCopy={handleCopy} />
+                // <DesktopWindow content="" onCopy={handleCopy} />
+                <ArticleStationary content="" />
               )}
 
               {/* Previous Generations */}
@@ -306,16 +311,10 @@ export default function Home() {
                       ? generationHistory.slice(1)
                       : generationHistory
                     ).map((generation) => (
-                      <Box key={generation.id}>
-                        <Text fontSize="xs" color="gray.500" mb={2}>
-                          {new Date(generation.timestamp).toLocaleString()}
-                        </Text>
-                        <DesktopWindow
-                          title={generation.title}
-                          content={generation.content}
-                          onCopy={handleCopy}
-                        />
-                      </Box>
+                      <ArticleStationary
+                        key={generation.title}
+                        content={generation.content}
+                      />
                     ))}
                   </Stack>
                 )}
