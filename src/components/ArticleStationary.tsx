@@ -14,7 +14,7 @@ export default function ArticleStationary({ content }: ArticleStationaryProps) {
       boxShadow="lg"
       maxW="full"
       fontFamily="monospace"
-      minH="100vh"
+      minH="900px"
     >
       <Stack direction="column" gap={6}>
         {/* Header section for Buckingham Palace logo */}
@@ -47,6 +47,12 @@ export default function ArticleStationary({ content }: ArticleStationaryProps) {
             {content}
           </Text>
         </Box>
+        <Image
+          src="/elizabeth-signature.svg"
+          maxH="16"
+          objectFit="contain"
+          alt="Queen elizabeth signature"
+        />
       </Stack>
     </Box>
   );

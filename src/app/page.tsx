@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Box, Container, Stack, Text, HStack } from "@chakra-ui/react";
+import { Box, Image, Container, Stack, Text, HStack } from "@chakra-ui/react";
 import DesktopWindow from "@/components/DesktopWindow";
 import MemoNotepad from "@/components/MemoNotepad";
 import Toast from "@/components/Toast";
@@ -229,7 +229,7 @@ export default function Home() {
   };
 
   return (
-    <Box minH="100vh" py={8} bg="gray.50">
+    <Box minH="100vh" py={8} bg="gray.50" position="relative">
       <Container maxW="5xl" mx="auto">
         <Stack gap={6}>
           {/* Main Content - Side by Side Layout */}
@@ -238,13 +238,32 @@ export default function Home() {
             align="start"
             flexWrap={{ base: "wrap", lg: "nowrap" }}
           >
-            {/* Memo Notepad - Left Side */}
-            <MemoNotepad
-              userInput={userInput}
-              onUserInputChange={setUserInput}
-              onGenerate={handleGenerate}
-              isLoading={isLoading}
-            />
+            {/* Left Side - Notepad and Fountain Pen */}
+            <HStack gap={4} align="start" position="sticky">
+              {/* Memo Notepad */}
+              <MemoNotepad
+                userInput={userInput}
+                onUserInputChange={setUserInput}
+                onGenerate={handleGenerate}
+                isLoading={isLoading}
+              />
+
+              {/* Fountain Pen */}
+              {/* <Box
+                display={{ base: "none", md: "block" }}
+                alignSelf="flex-start"
+                pt={8}
+              >
+                <Image
+                  src="/fountain-pen.png"
+                  alt="Fountain Pen"
+                  h="400px"
+                  w="auto"
+                  objectFit="contain"
+                  filter="drop-shadow(2px 2px 4px rgba(0,0,0,0.1))"
+                />
+              </Box> */}
+            </HStack>
 
             {/* Desktop Window - Right Side */}
             <Box flex="1" minW="600px">

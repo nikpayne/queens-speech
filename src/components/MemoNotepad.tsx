@@ -4,7 +4,7 @@ import {
   Textarea,
   Button,
   Image,
-  Collapsible,
+  Presence,
 } from "@chakra-ui/react";
 
 interface MemoNotepadProps {
@@ -21,7 +21,7 @@ export default function MemoNotepad({
   isLoading,
 }: MemoNotepadProps) {
   return (
-    <Box
+    <Stack
       bg="white"
       borderRadius="sm"
       boxShadow="md"
@@ -68,23 +68,26 @@ export default function MemoNotepad({
             pt={1}
           />
 
-          {!isLoading && userInput.trim().length > 0 && (
+          <Presence
+            present={!isLoading && userInput.trim().length > 0}
+            animationName={{
+              _open: "scale-fade-in",
+              _closed: "scale-fade-out",
+            }}
+            animationDuration="moderate"
+          >
             <Button
               onClick={onGenerate}
-              disabled={!userInput.trim() || isLoading}
+              variant="outline"
               borderRadius="sm"
-              mt={3}
               w="full"
               fontSize="sm"
-              _hover={{
-                bg: "#b8960a",
-              }}
             >
               Compose royal thoughts
             </Button>
-          )}
+          </Presence>
         </Box>
       </Stack>
-    </Box>
+    </Stack>
   );
 }
