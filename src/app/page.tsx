@@ -318,9 +318,6 @@ export default function Home() {
                 !isLoading &&
                 !streamingContent && (
                   <Stack gap={6} mt={8}>
-                    <Text fontSize="lg" fontWeight="semibold" color="gray.700">
-                      Previous Royal Thoughts
-                    </Text>
                     {(result
                       ? generationHistory.slice(1)
                       : generationHistory
