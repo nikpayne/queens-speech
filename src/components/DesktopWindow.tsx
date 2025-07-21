@@ -1,17 +1,28 @@
-import { Box, HStack, Text } from "@chakra-ui/react";
+import { Box, HStack, Text, IconButton } from "@chakra-ui/react";
+import { MdContentCopy } from "react-icons/md";
 import ArticleStationary from "./ArticleStationary";
 
 interface DesktopWindowProps {
   content: string;
   title?: string;
-  date?: string;
+  onCopy?: () => void;
 }
 
 export default function DesktopWindow({
   content,
   title,
-  date,
+  onCopy,
 }: DesktopWindowProps) {
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(content);
+      if (onCopy) {
+        onCopy();
+      }
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+    }
+  };
   return (
     <Box
       bg="white"
@@ -59,17 +70,33 @@ export default function DesktopWindow({
             color="gray.700"
             flex="1"
             textAlign="center"
-            mr={12} // Offset to center the title properly
-            noOfLines={1}
+            maxLines={1}
           >
             {title || "Untitled memo"}
           </Text>
+
+          {/* Copy Button */}
+          {content && (
+            <IconButton
+              aria-label="Copy to clipboard"
+              size="sm"
+              variant="ghost"
+              color="gray.600"
+              onClick={handleCopy}
+              _hover={{
+                bg: "gray.200",
+                color: "gray.800",
+              }}
+            >
+              <MdContentCopy />
+            </IconButton>
+          )}
         </HStack>
       </Box>
 
       {/* Content Area */}
       <Box>
-        <ArticleStationary content={content} date={date} />
+        <ArticleStationary content={content} />
       </Box>
     </Box>
   );

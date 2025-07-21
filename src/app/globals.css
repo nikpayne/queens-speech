@@ -40,3 +40,15 @@ a {
     color-scheme: dark;
   }
 }
+
+.felipa-regular {
+  font-family: "Felipa", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.la-belle-aurore-regular {
+  font-family: "La Belle Aurore", serif;
+  font-weight: 400;
+  font-style: normal;
+}

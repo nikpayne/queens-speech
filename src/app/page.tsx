@@ -1,15 +1,15 @@
 "use client";
 
-import { useState } from "react";
-import {
-  Box,
-  Container,
-  Stack,
-  Text,
-  Textarea,
-  Button,
-} from "@chakra-ui/react";
+import { useState, useEffect } from "react";
+import { Box, Container, Stack, Text, HStack } from "@chakra-ui/react";
 import DesktopWindow from "@/components/DesktopWindow";
+import MemoNotepad from "@/components/MemoNotepad";
+import Toast from "@/components/Toast";
+import {
+  saveGeneration,
+  getGenerationHistory,
+  GenerationHistory,
+} from "@/lib/storage";
 
 interface GenerationResult {
   success: boolean;
@@ -29,6 +29,25 @@ export default function Home() {
   const [loadingPhrase, setLoadingPhrase] = useState("");
   const [streamingContent, setStreamingContent] = useState("");
   const [streamingTitle, setStreamingTitle] = useState("");
+  const [showToast, setShowToast] = useState(false);
+  const [generationHistory, setGenerationHistory] = useState<
+    GenerationHistory[]
+  >([]);
+
+  const handleCopy = () => {
+    setShowToast(true);
+  };
+
+  const handleCloseToast = () => {
+    setShowToast(false);
+  };
+
+  useEffect(() => {
+    // Load generation history on component mount
+    const history = getGenerationHistory();
+    console.log("Component mounted, loading history:", history);
+    setGenerationHistory(history);
+  }, []);
 
   const loadingPhrases = [
     "thinkimg...",
@@ -159,6 +178,30 @@ export default function Home() {
                 };
                 console.log("Setting result to:", finalResult);
                 setResult(finalResult);
+
+                // Save to localStorage
+                if (accumulatedTitle && accumulatedContent) {
+                  console.log(
+                    "Attempting to save generation:",
+                    accumulatedTitle
+                  );
+                  const savedGeneration = saveGeneration({
+                    prompt: userInput.trim(),
+                    title: accumulatedTitle,
+                    content: accumulatedContent,
+                    usedReferences: usedReferences,
+                  });
+
+                  // Update local state with new history
+                  const updatedHistory = getGenerationHistory();
+                  console.log(
+                    "Updated history after save:",
+                    updatedHistory.length,
+                    "items"
+                  );
+                  setGenerationHistory(updatedHistory);
+                }
+
                 // Clear streaming content so final result shows
                 setStreamingContent("");
                 setStreamingTitle("");
@@ -186,30 +229,44 @@ export default function Home() {
   };
 
   return (
-    <Box minH="100vh" py={8}>
-      <Container maxW="2xl" mx="auto">
+    <Box minH="100vh" py={8} bg="gray.50">
+      <Container maxW="5xl" mx="auto">
         <Stack gap={6}>
-          {/* Main Content - Single Column with Overlay */}
-          <Box position="relative" w="full">
-            {/* Default Empty Stationary or Streaming Content */}
-            <Box>
+          {/* Main Content - Side by Side Layout */}
+          <HStack
+            gap={8}
+            align="start"
+            flexWrap={{ base: "wrap", lg: "nowrap" }}
+          >
+            {/* Memo Notepad - Left Side */}
+            <MemoNotepad
+              userInput={userInput}
+              onUserInputChange={setUserInput}
+              onGenerate={handleGenerate}
+              isLoading={isLoading}
+            />
+
+            {/* Desktop Window - Right Side */}
+            <Box flex="1" minW="600px">
               {/* Show loading phrase only when loading and no streaming content yet */}
               {isLoading && !streamingContent && (
-                <DesktopWindow content={loadingPhrase} />
+                <DesktopWindow content={loadingPhrase} onCopy={handleCopy} />
               )}
 
               {/* Show streaming content as it comes in */}
-              {streamingContent && <DesktopWindow content={streamingContent} />}
+              {streamingContent && (
+                <DesktopWindow content={streamingContent} onCopy={handleCopy} />
+              )}
 
               {/* Show final result when streaming is complete */}
               {result && !isLoading && !streamingContent && (
                 <>
                   {result.success ? (
                     <>
-                      {console.log("Final result title:", result.title)}
                       <DesktopWindow
                         title={result.title || ""}
                         content={result.article || ""}
+                        onCopy={handleCopy}
                       />
                     </>
                   ) : (
@@ -234,83 +291,39 @@ export default function Home() {
 
               {/* Show empty stationary by default */}
               {!result && !isLoading && !streamingContent && (
-                <DesktopWindow content="" />
+                <DesktopWindow content="" onCopy={handleCopy} />
               )}
+
+              {/* Previous Generations */}
+              {generationHistory.length > 0 &&
+                !isLoading &&
+                !streamingContent && (
+                  <Stack gap={6} mt={8}>
+                    <Text fontSize="lg" fontWeight="semibold" color="gray.700">
+                      Previous Royal Thoughts
+                    </Text>
+                    {(result
+                      ? generationHistory.slice(1)
+                      : generationHistory
+                    ).map((generation) => (
+                      <Box key={generation.id}>
+                        <Text fontSize="xs" color="gray.500" mb={2}>
+                          {new Date(generation.timestamp).toLocaleString()}
+                        </Text>
+                        <DesktopWindow
+                          title={generation.title}
+                          content={generation.content}
+                          onCopy={handleCopy}
+                        />
+                      </Box>
+                    ))}
+                  </Stack>
+                )}
             </Box>
-
-            {/* Post-it Note Input Overlay */}
-            {!isLoading && (
-              <Box
-                position="absolute"
-                top="120px"
-                left="60px"
-                zIndex={10}
-                transform="rotate(-1.5deg)"
-                bg="yellow.200"
-                p={4}
-                borderRadius="sm"
-                boxShadow="lg"
-                border="1px solid"
-                borderColor="yellow.300"
-                maxW="300px"
-                _before={{
-                  content: '""',
-                  position: "absolute",
-                  top: "-8px",
-                  left: "50%",
-                  transform: "translateX(-50%)",
-                  width: "40px",
-                  height: "15px",
-                  bg: "yellow.100",
-                  borderRadius: "sm",
-                  border: "1px solid",
-                  borderColor: "yellow.300",
-                }}
-              >
-                <Stack gap={3}>
-                  <Text fontSize="xs" fontWeight="bold" color="gray.700" mb={1}>
-                    ✍️ Note to Her Majesty
-                  </Text>
-
-                  <Textarea
-                    placeholder="Write your message to the Queen here..."
-                    value={userInput}
-                    onChange={(e) => setUserInput(e.target.value)}
-                    rows={4}
-                    resize="none"
-                    maxLength={2000}
-                    bg="transparent"
-                    border="none"
-                    outline="none"
-                    _focus={{
-                      boxShadow: "none",
-                      border: "none",
-                    }}
-                    fontSize="sm"
-                    fontFamily="cursive"
-                    color="gray.800"
-                  />
-
-                  <Text fontSize="xs" color="gray.500" textAlign="right">
-                    {userInput.length}/2000
-                  </Text>
-
-                  <Button
-                    colorScheme="purple"
-                    size="sm"
-                    onClick={handleGenerate}
-                    disabled={!userInput.trim() || isLoading}
-                    borderRadius="sm"
-                  >
-                    Send to the Queen 👑
-                  </Button>
-                </Stack>
-              </Box>
-            )}
-          </Box>
+          </HStack>
 
           {/* Reference Info at Bottom */}
-          <Stack gap={4}>
+          {/* <Stack gap={4}>
             {result &&
               result.usedReferences &&
               result.usedReferences.length > 0 && (
@@ -335,9 +348,16 @@ export default function Home() {
                   </Stack>
                 </Box>
               )}
-          </Stack>
+          </Stack> */}
         </Stack>
       </Container>
+
+      {/* Toast Notification */}
+      <Toast
+        message="The Queen's speech was copied to clipboard! 👑"
+        isVisible={showToast}
+        onClose={handleCloseToast}
+      />
     </Box>
   );
 }
