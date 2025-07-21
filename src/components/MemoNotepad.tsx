@@ -50,6 +50,28 @@ export default function MemoNotepad({
             placeholder="What is the queen thinking..."
             value={userInput}
             onChange={(e) => onUserInputChange(e.target.value)}
+            onKeyDown={(e) => {
+              console.log("Key pressed:", {
+                key: e.key,
+                metaKey: e.metaKey,
+                cmdKey: e.metaKey,
+                isLoading,
+                hasText: userInput.trim().length > 0,
+                fullEvent: e,
+              });
+
+              if (e.metaKey && e.key === "Enter") {
+                console.log("Cmd+Enter detected! Conditions met:", {
+                  notLoading: !isLoading,
+                  hasText: userInput.trim().length > 0,
+                });
+                e.preventDefault();
+                if (!isLoading && userInput.trim().length > 0) {
+                  console.log("Calling onGenerate()");
+                  onGenerate();
+                }
+              }
+            }}
             rows={12}
             resize="none"
             maxLength={2000}
@@ -85,6 +107,8 @@ export default function MemoNotepad({
               borderRadius="sm"
               w="full"
               fontSize="sm"
+              fontFamily="'Beth Ellen', 'La Belle Aurore', serif"
+              bg="blackAlpha.100"
             >
               Compose royal thoughts
             </Button>

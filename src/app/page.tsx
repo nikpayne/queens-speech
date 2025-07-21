@@ -46,7 +46,6 @@ export default function Home() {
   useEffect(() => {
     // Load generation history on component mount
     const history = getGenerationHistory();
-    console.log("Component mounted, loading history:", history);
     setGenerationHistory(history);
   }, []);
 
@@ -150,56 +149,29 @@ export default function Home() {
           if (line.startsWith("data: ")) {
             try {
               const data = JSON.parse(line.slice(6));
-              console.log("Received data:", data);
 
               if (data.type === "metadata") {
                 usedReferences = data.usedReferences;
               } else if (data.type === "title") {
                 accumulatedTitle = data.chunk;
-                console.log("Setting accumulatedTitle to:", accumulatedTitle);
                 setStreamingTitle(data.chunk);
               } else if (data.type === "content") {
                 accumulatedContent += data.chunk;
                 setStreamingContent(accumulatedContent);
               } else if (data.type === "complete") {
                 // Streaming complete
-                console.log(
-                  "Streaming complete! accumulatedTitle:",
-                  accumulatedTitle
-                );
-                console.log(
-                  "Streaming complete! accumulatedContent length:",
-                  accumulatedContent.length
-                );
                 const finalResult = {
                   success: true,
                   title: accumulatedTitle,
                   article: accumulatedContent,
                   usedReferences: usedReferences,
                 };
-                console.log("Setting result to:", finalResult);
                 setResult(finalResult);
 
                 // Save to localStorage
                 if (accumulatedTitle && accumulatedContent) {
-                  console.log(
-                    "Attempting to save generation:",
-                    accumulatedTitle
-                  );
-                  const savedGeneration = saveGeneration({
-                    prompt: userInput.trim(),
-                    title: accumulatedTitle,
-                    content: accumulatedContent,
-                    usedReferences: usedReferences,
-                  });
-
                   // Update local state with new history
                   const updatedHistory = getGenerationHistory();
-                  console.log(
-                    "Updated history after save:",
-                    updatedHistory.length,
-                    "items"
-                  );
                   setGenerationHistory(updatedHistory);
                 }
 
