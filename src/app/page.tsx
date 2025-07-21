@@ -246,7 +246,10 @@ export default function Home() {
                         content={result.article || ""}
                         onCopy={handleCopy}
                       />  */}
-                      <ArticleStationary content={result.article || ""} />
+                      <ArticleStationary
+                        content={result.article || ""}
+                        showSignature={true}
+                      />
                     </>
                   ) : (
                     <Box

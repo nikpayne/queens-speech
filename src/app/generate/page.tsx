@@ -193,7 +193,7 @@ export default function GeneratePage() {
               {result && !isLoading && !streamingContent && (
                 <>
                   {result.success ? (
-                    <ArticleStationary content={result.article || ""} />
+                    <ArticleStationary content={result.article || ""} showSignature={true} />
                   ) : (
                     <Box
                       bg="red.50"

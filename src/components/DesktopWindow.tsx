@@ -6,12 +6,14 @@ interface DesktopWindowProps {
   content: string;
   title?: string;
   onCopy?: () => void;
+  showSignature?: boolean;
 }
 
 export default function DesktopWindow({
   content,
   title,
   onCopy,
+  showSignature = false,
 }: DesktopWindowProps) {
   const handleCopy = async () => {
     try {
@@ -96,7 +98,7 @@ export default function DesktopWindow({
 
       {/* Content Area */}
       <Box>
-        <ArticleStationary content={content} />
+        <ArticleStationary content={content} showSignature={showSignature} />
       </Box>
     </Box>
   );

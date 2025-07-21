@@ -51,23 +51,9 @@ export default function MemoNotepad({
             value={userInput}
             onChange={(e) => onUserInputChange(e.target.value)}
             onKeyDown={(e) => {
-              console.log("Key pressed:", {
-                key: e.key,
-                metaKey: e.metaKey,
-                cmdKey: e.metaKey,
-                isLoading,
-                hasText: userInput.trim().length > 0,
-                fullEvent: e,
-              });
-
               if (e.metaKey && e.key === "Enter") {
-                console.log("Cmd+Enter detected! Conditions met:", {
-                  notLoading: !isLoading,
-                  hasText: userInput.trim().length > 0,
-                });
                 e.preventDefault();
                 if (!isLoading && userInput.trim().length > 0) {
-                  console.log("Calling onGenerate()");
                   onGenerate();
                 }
               }
