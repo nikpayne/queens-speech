@@ -75,7 +75,7 @@ export default function MemoNotepad({
               boxShadow: "none",
               border: "none",
             }}
-            fontFamily="'Beth Ellen', 'La Belle Aurore', serif"
+            fontFamily="'Homemade Apple', 'Beth Ellen', 'La Belle Aurore', serif"
             _placeholder={{
               color: "gray.400",
             }}

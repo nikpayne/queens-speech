@@ -19,7 +19,7 @@ export default function RootLayout({
           crossOrigin=""
         />
         <link
-          href="https://fonts.googleapis.com/css2?family=La+Belle+Aurore&family=Beth+Ellen&display=swap"
+          href="https://fonts.googleapis.com/css2?family=La+Belle+Aurore&family=Beth+Ellen&family=Homemade+Apple&display=swap"
           rel="stylesheet"
         />
       </head>

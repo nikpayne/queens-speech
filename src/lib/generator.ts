@@ -43,12 +43,14 @@ USER INPUT TO TRANSFORM:
 WRITING SAMPLES:
 ${referencesText}
 
-Write a complete Clickhole-style article. Start with the title on the first line, then a blank line, then the article body. Do not use any JSON formatting, quotes, or special characters around the title or body. Just write the title and article naturally.
+Write a complete Clickhole-style article. Write the article content FIRST, then on a new line after "TITLE:" write the clickhole-style title.
 
 Example format:
-My Amazing Title Here
+This is the article body content that comes first...
 
-This is the article body content that follows...
+More article content here...
+
+TITLE: My Amazing Clickhole Title Here
 
 Now write your article:`;
 
@@ -71,56 +73,51 @@ Now write your article:`;
       let fullContent = '';
       let title = '';
       let body = '';
-      let isParsingTitle = true;
+      let foundTitleMarker = false;
 
       for await (const chunk of stream) {
         if (chunk.type === 'content_block_delta' && chunk.delta.type === 'text_delta') {
           const text = chunk.delta.text;
           fullContent += text;
 
-          if (isParsingTitle) {
-            // Check if we've hit a newline (end of title)
-            const newlineIndex = fullContent.indexOf('\n');
-            console.log('Parsing title, fullContent so far:', JSON.stringify(fullContent));
-            console.log('Looking for newline, index:', newlineIndex);
-            if (newlineIndex !== -1) {
-              title = fullContent.substring(0, newlineIndex).trim();
-              console.log('Found title:', JSON.stringify(title));
-              onChunk(title, true); // Send title
+          if (!foundTitleMarker) {
+            // Check if we've hit the title marker
+            const titleMarkerIndex = fullContent.indexOf('TITLE:');
+            if (titleMarkerIndex !== -1) {
+              // Found the title marker
+              foundTitleMarker = true;
+              body = fullContent.substring(0, titleMarkerIndex).trim();
               
-              // Start parsing body
-              body = fullContent.substring(newlineIndex + 1);
-              isParsingTitle = false;
-              
-              // Send any body content we already have
-              if (body.trim()) {
-                console.log('Sending initial body content:', JSON.stringify(body));
-                onChunk(body, false);
+              // Start collecting title after "TITLE:"
+              const afterMarker = fullContent.substring(titleMarkerIndex + 6).trim();
+              if (afterMarker) {
+                title = afterMarker;
+                onChunk(afterMarker, true); // Send title chunk
               }
+            } else {
+              // Still in body content, stream it
+              onChunk(text, false);
             }
           } else {
-            // We're parsing the body, send each new chunk
-            body += text;
-            onChunk(text, false);
+            // We're collecting title content
+            title += text;
+            onChunk(text, true); // Stream title chunks
           }
         }
       }
 
       // Parse final result
-      const lines = fullContent.split('\n');
-      let titleIndex = 0;
-      while (titleIndex < lines.length && lines[titleIndex].trim() === '') {
-        titleIndex++;
+      const titleMarkerIndex = fullContent.indexOf('TITLE:');
+      let finalTitle = "Generated Article";
+      let finalBody = "Article content not found";
+      
+      if (titleMarkerIndex !== -1) {
+        finalBody = fullContent.substring(0, titleMarkerIndex).trim();
+        finalTitle = fullContent.substring(titleMarkerIndex + 6).trim();
+      } else {
+        // Fallback: treat entire content as body
+        finalBody = fullContent.trim();
       }
-      
-      const finalTitle = lines[titleIndex]?.trim() || title || "Generated Article";
-      
-      let bodyStartIndex = titleIndex + 1;
-      while (bodyStartIndex < lines.length && lines[bodyStartIndex].trim() === '') {
-        bodyStartIndex++;
-      }
-      
-      const finalBody = lines.slice(bodyStartIndex).join('\n').trim() || body || "Article content not found";
       
       return {
         title: finalTitle,
@@ -145,34 +142,19 @@ Now write your article:`;
       if (content.type === 'text') {
         const responseText = content.text.trim();
         
-        // Split the response into lines
-        const lines = responseText.split('\n');
+        // Look for the title marker
+        const titleMarkerIndex = responseText.indexOf('TITLE:');
+        let title = "Generated Article";
+        let body = "Article content not found";
         
-        // Find the first non-empty line as the title
-        let titleIndex = 0;
-        while (titleIndex < lines.length && lines[titleIndex].trim() === '') {
-          titleIndex++;
+        if (titleMarkerIndex !== -1) {
+          // Split at the title marker
+          body = responseText.substring(0, titleMarkerIndex).trim();
+          title = responseText.substring(titleMarkerIndex + 6).trim();
+        } else {
+          // Fallback: treat entire content as body
+          body = responseText;
         }
-        
-        if (titleIndex >= lines.length) {
-          // No content found, return fallback
-          return {
-            title: "Generated Article",
-            body: responseText
-          };
-        }
-        
-        const title = lines[titleIndex].trim();
-        
-        // Find the start of the body (skip empty lines after title)
-        let bodyStartIndex = titleIndex + 1;
-        while (bodyStartIndex < lines.length && lines[bodyStartIndex].trim() === '') {
-          bodyStartIndex++;
-        }
-        
-        // Join the remaining lines as the body
-        const bodyLines = lines.slice(bodyStartIndex);
-        const body = bodyLines.join('\n').trim();
         
         return {
           title: title || "Generated Article",

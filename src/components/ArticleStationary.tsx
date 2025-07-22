@@ -2,15 +2,17 @@ import { Box, HStack, Flex, Text, Stack, Image } from "@chakra-ui/react";
 
 interface ArticleStationaryProps {
   content: string;
+  title?: string;
   showSignature?: boolean;
 }
 
 export default function ArticleStationary({
   content,
+  title = "",
   showSignature = false,
 }: ArticleStationaryProps) {
   return (
-    <Box
+    <Stack
       bg="#FCFCF1"
       p={8}
       borderRadius="md"
@@ -19,6 +21,7 @@ export default function ArticleStationary({
       maxW="full"
       fontFamily="monospace"
       minH="900px"
+      justifyContent="space-between"
     >
       <Stack direction="column" gap={6}>
         {/* Header section for Buckingham Palace logo */}
@@ -51,22 +54,29 @@ export default function ArticleStationary({
             {content}
           </Text>
         </Box>
-
-        <HStack>
-          <Flex flex="1">
-            {/* Please put the title here */}
-            <Text color="gray.600" fontSize="sm"></Text>
-          </Flex>
-          <Image
-            opacity={showSignature ? 1 : 0}
-            transition="opacity 0.6s ease-in-out 0.5s"
-            src="/elizabeth-signature.svg"
-            maxH="16"
-            objectFit="contain"
-            alt="Queen elizabeth signature"
-          />
-        </HStack>
       </Stack>
-    </Box>
+
+      <HStack gap="6" alignItems="flex-start">
+        <Flex>
+          {/* Please put the title here */}
+          <Text
+            color="gray.400"
+            fontSize="sm"
+            fontFamily="'Homemade Apple', 'Beth Ellen', 'La Belle Aurore', serif"
+            transform="rotate(-0.1deg)"
+          >
+            {title.toLowerCase()}
+          </Text>
+        </Flex>
+        <Image
+          opacity={showSignature ? 1 : 0}
+          transition="opacity 0.6s ease-in-out 0.5s"
+          src="/elizabeth-signature.svg"
+          maxH="16"
+          objectFit="contain"
+          alt="Queen elizabeth signature"
+        />
+      </HStack>
+    </Stack>
   );
 }

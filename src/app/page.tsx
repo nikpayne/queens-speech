@@ -100,8 +100,8 @@ export default function Home() {
               if (data.type === "metadata") {
                 usedReferences = data.usedReferences;
               } else if (data.type === "title") {
-                accumulatedTitle = data.chunk;
-                setStreamingTitle(data.chunk);
+                accumulatedTitle += data.chunk;
+                setStreamingTitle(accumulatedTitle);
               } else if (data.type === "content") {
                 accumulatedContent += data.chunk;
                 setStreamingContent(accumulatedContent);
@@ -117,6 +117,12 @@ export default function Home() {
 
                 // Save to localStorage
                 if (accumulatedTitle && accumulatedContent) {
+                  saveGeneration({
+                    prompt: userInput,
+                    title: accumulatedTitle,
+                    content: accumulatedContent,
+                    usedReferences: usedReferences,
+                  });
                   // Update local state with new history
                   const updatedHistory = getGenerationHistory();
                   setGenerationHistory(updatedHistory);
@@ -148,6 +154,14 @@ export default function Home() {
     }
   };
 
+  const articleContent =
+    result && result.success ? result.article || "" : streamingContent || "";
+  const articleTitle =
+    result && result.success ? result.title || "" : streamingTitle || "";
+  const showSignature = Boolean(
+    result && result.success && !isLoading && !streamingContent
+  );
+
   return (
     <Box minH="100vh" py={8} bg="gray.50" position="relative">
       <Container maxW="5xl" mx="auto">
@@ -171,24 +185,14 @@ export default function Home() {
 
             {/* Desktop Window - Right Side */}
             <Box flex="1" minW="600px">
-              {/* Always render the same ArticleStationary component instance */}
+              {/* Latest generation */}
               <ArticleStationary
-                content={
-                  result && result.success
-                    ? result.article || ""
-                    : streamingContent || ""
-                }
-                showSignature={
-                  !!(
-                    result &&
-                    result.success &&
-                    !isLoading &&
-                    !streamingContent
-                  )
-                }
+                content={articleContent}
+                title={articleTitle}
+                showSignature={showSignature}
               />
 
-              {/* Show error state */}
+              {/* Error state */}
               {result && !result.success && (
                 <Box
                   bg="red.50"
@@ -219,6 +223,8 @@ export default function Home() {
                       <ArticleStationary
                         key={generation.title}
                         content={generation.content}
+                        title={generation.title}
+                        showSignature={true}
                       />
                     ))}
                   </Stack>
