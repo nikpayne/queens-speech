@@ -1,4 +1,4 @@
-import { Box, Text, Stack, Image } from "@chakra-ui/react";
+import { Box, HStack, Flex, Text, Stack, Image } from "@chakra-ui/react";
 
 interface ArticleStationaryProps {
   content: string;
@@ -52,14 +52,20 @@ export default function ArticleStationary({
           </Text>
         </Box>
 
-        <Image
-          opacity={showSignature ? 1 : 0}
-          transition="opacity 0.6s ease-in-out 0.5s"
-          src="/elizabeth-signature.svg"
-          maxH="16"
-          objectFit="contain"
-          alt="Queen elizabeth signature"
-        />
+        <HStack>
+          <Flex flex="1">
+            {/* Please put the title here */}
+            <Text color="gray.600" fontSize="sm"></Text>
+          </Flex>
+          <Image
+            opacity={showSignature ? 1 : 0}
+            transition="opacity 0.6s ease-in-out 0.5s"
+            src="/elizabeth-signature.svg"
+            maxH="16"
+            objectFit="contain"
+            alt="Queen elizabeth signature"
+          />
+        </HStack>
       </Stack>
     </Box>
   );

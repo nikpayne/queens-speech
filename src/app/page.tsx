@@ -34,10 +34,6 @@ export default function Home() {
     GenerationHistory[]
   >([]);
 
-  const handleCopy = () => {
-    setShowToast(true);
-  };
-
   const handleCloseToast = () => {
     setShowToast(false);
   };
