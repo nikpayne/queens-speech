@@ -6,6 +6,7 @@ import {
   Image,
   Presence,
 } from "@chakra-ui/react";
+import { useMemo } from "react";
 
 interface MemoNotepadProps {
   userInput: string;
@@ -20,6 +21,12 @@ export default function MemoNotepad({
   onGenerate,
   isLoading,
 }: MemoNotepadProps) {
+  // Pick a random loading message when component starts loading
+  const loadingMessage = useMemo(() => {
+    const randomIndex = Math.floor(Math.random() * LOADING_PHRASES.length);
+    return LOADING_PHRASES[randomIndex];
+  }, [isLoading]); // Re-pick when loading state changes
+
   return (
     <Stack
       bg="white"
@@ -59,7 +66,7 @@ export default function MemoNotepad({
               }
             }}
             rows={12}
-            resize="none"
+            autoresize
             maxLength={2000}
             bg="transparent"
             border="none"
@@ -80,7 +87,7 @@ export default function MemoNotepad({
           />
 
           <Presence
-            present={!isLoading && userInput.trim().length > 0}
+            present={isLoading || userInput.trim().length > 0}
             animationName={{
               _open: "scale-fade-in",
               _closed: "scale-fade-out",
@@ -95,6 +102,9 @@ export default function MemoNotepad({
               fontSize="sm"
               fontFamily="'Beth Ellen', 'La Belle Aurore', serif"
               bg="blackAlpha.100"
+              loading={isLoading}
+              disabled={isLoading || userInput.trim().length === 0}
+              loadingText={loadingMessage}
             >
               Compose royal thoughts
             </Button>
@@ -104,3 +114,46 @@ export default function MemoNotepad({
     </Stack>
   );
 }
+
+const LOADING_PHRASES = [
+  "thinkimg...",
+  "bloggin in",
+  "computering",
+  "writyng",
+  "procesiing thoughnt",
+  "cramfting wrdos",
+  "brain workign",
+  "typyng away",
+  "composering",
+  "wordsmithing",
+  "creafting blogg",
+  "assemblyng thoughnt",
+  "writyng magesty",
+  "bloggin royaly",
+  "computler thinkimg",
+  "crafyng sentance",
+  "processyng wrdos",
+  "royaly typyng",
+  "bloggin awya",
+  "finishyng upp",
+  "assemblyng the wrdos togethre",
+  "cramfting",
+  "royaly processyng blogg contrent",
+  "thinkimg very hardley",
+  "writyng upp storys",
+  "computler wokring magicaly",
+  "bloggin",
+  "creafting delightfull sentances",
+  "processyng",
+  "typyng away furiosly",
+  "computering the thoughnts",
+  "writyng royaly magnificennt bloggs",
+  "bloggin magesty",
+  "assemblyng wrdos into sentances",
+  "creafting",
+  "royaly thinkimg aboutt thingss",
+  "computler processyng wrdos",
+  "writyng upp delightfull contrent",
+  "bloggin away magnificentlty",
+  "finishyng upp the writyng",
+];

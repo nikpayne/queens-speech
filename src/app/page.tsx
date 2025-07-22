@@ -27,7 +27,6 @@ export default function Home() {
   const [userInput, setUserInput] = useState("");
   const [result, setResult] = useState<GenerationResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [loadingPhrase, setLoadingPhrase] = useState("");
   const [streamingContent, setStreamingContent] = useState("");
   const [streamingTitle, setStreamingTitle] = useState("");
   const [showToast, setShowToast] = useState(false);
@@ -49,49 +48,6 @@ export default function Home() {
     setGenerationHistory(history);
   }, []);
 
-  const loadingPhrases = [
-    "thinkimg...",
-    "bloggin in",
-    "computering",
-    "writyng",
-    "procesiing thoughnt",
-    "cramfting wrdos",
-    "brain workign",
-    "typyng away",
-    "composering",
-    "wordsmithing",
-    "creafting blogg",
-    "assemblyng thoughnt",
-    "writyng magesty",
-    "bloggin royaly",
-    "computler thinkimg",
-    "crafyng sentance",
-    "processyng wrdos",
-    "royaly typyng",
-    "bloggin awya",
-    "finishyng upp",
-    "assemblyng the wrdos togethre",
-    "cramfting",
-    "royaly processyng blogg contrent",
-    "thinkimg very hardley",
-    "writyng upp storys",
-    "computler wokring magicaly",
-    "bloggin",
-    "creafting delightfull sentances",
-    "processyng",
-    "typyng away furiosly",
-    "computering the thoughnts",
-    "writyng royaly magnificennt bloggs",
-    "bloggin magesty",
-    "assemblyng wrdos into sentances",
-    "creafting",
-    "royaly thinkimg aboutt thingss",
-    "computler processyng wrdos",
-    "writyng upp delightfull contrent",
-    "bloggin away magnificentlty",
-    "finishyng upp the writyng",
-  ];
-
   const handleGenerate = async () => {
     if (!userInput.trim()) {
       setResult({
@@ -105,11 +61,6 @@ export default function Home() {
     setResult(null);
     setStreamingContent("");
     setStreamingTitle("");
-
-    // Select a random loading phrase
-    const randomPhrase =
-      loadingPhrases[Math.floor(Math.random() * loadingPhrases.length)];
-    setLoadingPhrase(randomPhrase);
 
     try {
       const response = await fetch("/api/generate", {
@@ -224,57 +175,40 @@ export default function Home() {
 
             {/* Desktop Window - Right Side */}
             <Box flex="1" minW="600px">
-              {/* Show loading phrase only when loading and no streaming content yet */}
-              {isLoading && !streamingContent && (
-                // <DesktopWindow content={loadingPhrase} onCopy={handleCopy} />
-                <ArticleStationary content={streamingContent} />
-              )}
+              {/* Always render the same ArticleStationary component instance */}
+              <ArticleStationary
+                content={
+                  result && result.success
+                    ? result.article || ""
+                    : streamingContent || ""
+                }
+                showSignature={
+                  !!(
+                    result &&
+                    result.success &&
+                    !isLoading &&
+                    !streamingContent
+                  )
+                }
+              />
 
-              {/* Show streaming content as it comes in */}
-              {streamingContent && (
-                // <DesktopWindow content={streamingContent} onCopy={handleCopy} />
-                <ArticleStationary content={streamingContent} />
-              )}
-
-              {/* Show final result when streaming is complete */}
-              {result && !isLoading && !streamingContent && (
-                <>
-                  {result.success ? (
-                    <>
-                      {/* <DesktopWindow
-                        title={result.title || ""}
-                        content={result.article || ""}
-                        onCopy={handleCopy}
-                      />  */}
-                      <ArticleStationary
-                        content={result.article || ""}
-                        showSignature={true}
-                      />
-                    </>
-                  ) : (
-                    <Box
-                      bg="red.50"
-                      border="1px solid"
-                      borderColor="red.200"
-                      p={4}
-                      borderRadius="md"
-                      m={4}
-                    >
-                      <Text color="red.800" fontWeight="bold">
-                        Generation Failed!
-                      </Text>
-                      <Text color="red.700" mt={1}>
-                        {result.error}
-                      </Text>
-                    </Box>
-                  )}
-                </>
-              )}
-
-              {/* Show empty stationary by default */}
-              {!result && !isLoading && !streamingContent && (
-                // <DesktopWindow content="" onCopy={handleCopy} />
-                <ArticleStationary content="" />
+              {/* Show error state */}
+              {result && !result.success && (
+                <Box
+                  bg="red.50"
+                  border="1px solid"
+                  borderColor="red.200"
+                  p={4}
+                  borderRadius="md"
+                  m={4}
+                >
+                  <Text color="red.800" fontWeight="bold">
+                    Generation Failed!
+                  </Text>
+                  <Text color="red.700" mt={1}>
+                    {result.error}
+                  </Text>
+                </Box>
               )}
 
               {/* Previous Generations */}

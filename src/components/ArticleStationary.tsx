@@ -54,7 +54,7 @@ export default function ArticleStationary({
 
         <Image
           opacity={showSignature ? 1 : 0}
-          transition="opacity 0.5s ease-in-out"
+          transition="opacity 0.6s ease-in-out 0.5s"
           src="/elizabeth-signature.svg"
           maxH="16"
           objectFit="contain"
