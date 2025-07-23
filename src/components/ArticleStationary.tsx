@@ -32,6 +32,8 @@ export default function ArticleStationary({
       minH="900px"
       justifyContent="space-between"
       gap={6}
+      filter={!content ? "blur(1.5px)" : "none"}
+      transition="filter 0.3s ease-in-out"
     >
       <Stack direction="column" gap={6}>
         {/* Header section for Buckingham Palace logo */}

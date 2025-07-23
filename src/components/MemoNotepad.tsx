@@ -6,8 +6,54 @@ import {
   Image,
   Flex,
   useBreakpointValue,
+  Text,
 } from "@chakra-ui/react";
+import { keyframes } from "@emotion/react";
 import { useMemo } from "react";
+import { LOADING_PHRASES } from "./constants";
+
+interface AnimatedLoadingTextProps {
+  text: string;
+}
+
+function AnimatedLoadingText({ text }: AnimatedLoadingTextProps) {
+  const slideIn = keyframes`
+    from {
+      opacity: 0;
+      transform: translateX(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  `;
+
+  return (
+    <Text
+      fontSize="sm"
+      color="gray.700"
+      fontWeight="bold"
+      textAlign="center"
+      fontFamily="'Cormorant SC', 'Playfair Display', serif"
+      letterSpacing="0.05em"
+    >
+      {text.split("").map((char, index) => (
+        <Box
+          key={index}
+          as="span"
+          display="inline-block"
+          opacity={0}
+          transform="translateX(1em)"
+          css={{
+            animation: `${slideIn} 1s ease-out ${index * 0.2}s both`,
+          }}
+        >
+          {char === " " ? "\u00A0" : char}
+        </Box>
+      ))}
+    </Text>
+  );
+}
 
 interface MemoNotepadProps {
   userInput: string;
@@ -37,7 +83,6 @@ export default function MemoNotepad({
       boxShadow="md"
       p={6}
       w="100%"
-      minH={isMobile ? "300px" : "500px"}
       position="relative"
       transform={!isMobile ? "rotate(-0.2deg) translateY(3px)" : "none"}
       maxW="500px"
@@ -63,6 +108,7 @@ export default function MemoNotepad({
         {/* Notepad Lines and Input */}
         <Box position="relative" zIndex={1}>
           <Textarea
+            autoFocus
             placeholder="What is the queen thinking..."
             value={userInput}
             onChange={(e) => onUserInputChange(e.target.value)}
@@ -107,55 +153,14 @@ export default function MemoNotepad({
             bg="blackAlpha.100"
             loading={isLoading}
             disabled={isLoading || !userInput.trim()}
-            loadingText={loadingMessage}
+            letterSpacing="0.02em"
           >
             compose royal thoughts
           </Button>
+
+          {isLoading && <AnimatedLoadingText text={loadingMessage} />}
         </Box>
       </Stack>
     </Stack>
   );
 }
-
-const LOADING_PHRASES = [
-  "thinkimg...",
-  "bloggin in",
-  "computering",
-  "writyng",
-  "procesiing thoughnt",
-  "cramfting wrdos",
-  "brain workign",
-  "typyng away",
-  "composering",
-  "wordsmithing",
-  "creafting blogg",
-  "assemblyng thoughnt",
-  "writyng magesty",
-  "bloggin royaly",
-  "computler thinkimg",
-  "crafyng sentance",
-  "processyng wrdos",
-  "royaly typyng",
-  "bloggin awya",
-  "finishyng upp",
-  "assemblyng the wrdos togethre",
-  "cramfting",
-  "royaly processyng blogg contrent",
-  "thinkimg very hardley",
-  "writyng upp storys",
-  "computler wokring magicaly",
-  "bloggin",
-  "creafting delightfull sentances",
-  "processyng",
-  "typyng away furiosly",
-  "computering the thoughnts",
-  "writyng royaly magnificennt bloggs",
-  "bloggin magesty",
-  "assemblyng wrdos into sentances",
-  "creafting",
-  "royaly thinkimg aboutt thingss",
-  "computler processyng wrdos",
-  "writyng upp delightfull contrent",
-  "bloggin away magnificentlty",
-  "finishyng upp the writyng",
-];

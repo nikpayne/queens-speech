@@ -14,7 +14,6 @@ import {
 } from "@chakra-ui/react";
 import DesktopWindow from "@/components/DesktopWindow";
 import MemoNotepad from "@/components/MemoNotepad";
-import Toast from "@/components/Toast";
 import ArticleStationary from "@/components/ArticleStationary";
 import {
   saveGeneration,
@@ -39,14 +38,9 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
   const [streamingTitle, setStreamingTitle] = useState("");
-  const [showToast, setShowToast] = useState(false);
   const [generationHistory, setGenerationHistory] = useState<
     GenerationHistory[]
   >([]);
-
-  const handleCloseToast = () => {
-    setShowToast(false);
-  };
 
   useEffect(() => {
     // Load generation history on component mount
