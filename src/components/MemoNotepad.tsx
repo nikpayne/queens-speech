@@ -12,6 +12,7 @@ import {
 import { keyframes } from "@emotion/react";
 import { useMemo, useState } from "react";
 import { LOADING_PHRASES } from "./constants";
+import type { GenerationMode } from "@/lib/generator";
 
 interface AnimatedLoadingTextProps {
   text: string;
@@ -63,14 +64,18 @@ function AnimatedLoadingText({ text }: AnimatedLoadingTextProps) {
 
 interface MemoNotepadProps {
   userInput: string;
+  mode: GenerationMode;
   onUserInputChange: (value: string) => void;
+  onModeChange: (mode: GenerationMode) => void;
   onGenerate: () => void;
   isLoading: boolean;
 }
 
 export default function MemoNotepad({
   userInput,
+  mode,
   onUserInputChange,
+  onModeChange,
   onGenerate,
   isLoading,
 }: MemoNotepadProps) {
@@ -81,7 +86,6 @@ export default function MemoNotepad({
   }, []); // Re-pick when loading state changes
 
   const isMobile = useBreakpointValue({ base: true, lg: false });
-  const [mode, setMode] = useState<"write" | "refine">("write");
 
   return (
     <Stack
@@ -155,7 +159,7 @@ export default function MemoNotepad({
                 position="relative"
                 cursor="pointer"
                 minW="6em"
-                onClick={() => setMode(modeOption)}
+                onClick={() => onModeChange(modeOption)}
               >
                 {mode === modeOption && (
                   <Image

@@ -21,6 +21,7 @@ import {
   deleteGeneration,
   GenerationHistory,
 } from "@/lib/storage";
+import type { GenerationMode } from "@/lib/generator";
 
 interface GenerationResult {
   success: boolean;
@@ -35,6 +36,7 @@ interface GenerationResult {
 
 export default function Home() {
   const [userInput, setUserInput] = useState("");
+  const [mode, setMode] = useState<GenerationMode>("write");
   const [result, setResult] = useState<GenerationResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [streamingContent, setStreamingContent] = useState("");
@@ -84,6 +86,7 @@ export default function Home() {
         },
         body: JSON.stringify({
           userInput: userInput.trim(),
+          mode: mode,
         }),
       });
 
@@ -224,7 +227,9 @@ export default function Home() {
           <Box>
             <MemoNotepad
               userInput={userInput}
+              mode={mode}
               onUserInputChange={setUserInput}
+              onModeChange={setMode}
               onGenerate={handleGenerate}
               isLoading={isLoading}
             />

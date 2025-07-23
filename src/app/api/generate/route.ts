@@ -1,15 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { generateQueenElizabethClickhole } from '@/lib/generator';
+import { generateQueenElizabethClickhole, type GenerationMode } from '@/lib/generator';
 import { getAllReferences, pickRelevantReferences } from '@/lib/referencePicker';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userInput } = body;
+    const { userInput, mode = "write" } = body;
 
     if (!userInput || typeof userInput !== 'string') {
       return NextResponse.json(
         { error: 'User input is required and must be a string' },
+        { status: 400 }
+      );
+    }
+
+    if (mode && !['write', 'refine'].includes(mode)) {
+      return NextResponse.json(
+        { error: 'Mode must be either "write" or "refine"' },
         { status: 400 }
       );
     }
@@ -61,6 +68,7 @@ export async function POST(request: NextRequest) {
           // Generate the article with streaming
           await generateQueenElizabethClickhole({
             userInput,
+            mode: mode as GenerationMode,
             references: relevantReferences,
             onChunk: (chunk: string, isTitle: boolean) => {
               const data = {

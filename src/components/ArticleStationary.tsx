@@ -175,7 +175,7 @@ export default function ArticleStationary({
 
 const PaperHolders = () => {
   // Paper holder triangle styles
-  const OFFSET = 2;
+  const OFFSET = 1;
   const PAPER_HOLDER_SIZE = 16;
   const paperHolderStyle = {
     position: "absolute" as const,

@@ -1,12 +1,17 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { ReferenceArticle } from './referencePicker';
+import { generateWritePrompt } from './writePrompt';
+import { generateRefinePrompt } from './refinePrompt';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+export type GenerationMode = "write" | "refine";
+
 interface GenerationRequest {
   userInput: string;
+  mode: GenerationMode;
   references: ReferenceArticle[];
   onChunk?: (chunk: string, isTitle: boolean) => void;
 }
@@ -19,40 +24,12 @@ interface GenerationResult {
 export async function generateQueenElizabethClickhole(
   request: GenerationRequest
 ): Promise<GenerationResult> {
-  const { userInput, references, onChunk } = request;
+  const { userInput, mode, references, onChunk } = request;
 
-  const referencesText = references.map((ref, index) => {
-    return `REFERENCE EXAMPLE ${index + 1}:
-Title: ${ref.title}
-Content: ${ref.content.substring(0, 1000)}...
-
----
-
-`;
-  }).join('');
-
-const prompt = 
-
-`Your job is to write in the style of Clickhole.com's Queen Elizabeth articles. They are funny, and have a very distinct style and tone, and are full of misspellings, typos and absurd syntax.
-
-I will be providing you some writing samples of real clickhole articles, and your job is to turn translate the user's input into the same style.
-
-USER INPUT TO TRANSFORM:
-"${userInput}"
-
-WRITING SAMPLES:
-${referencesText}
-
-Write a complete Clickhole-style article. Write the article content FIRST, then on a new line after "TITLE:" write the clickhole-style title.
-
-Example format:
-This is the article body content that comes first...
-
-More article content here...
-
-TITLE: My Amazing Clickhole Title Here
-
-Now write your article:`;
+  // Select the appropriate prompt based on mode
+  const prompt = mode === "write" 
+    ? generateWritePrompt(userInput, references)
+    : generateRefinePrompt(userInput, references);
 
   try {
     if (onChunk) {
@@ -127,7 +104,7 @@ Now write your article:`;
       // Handle non-streaming response (fallback)
       const response = await anthropic.messages.create({
         model: 'claude-3-haiku-20240307',
-        max_tokens: 1500,
+        max_tokens: 2500,
         temperature: 0.8,
         stream: false,
         messages: [
