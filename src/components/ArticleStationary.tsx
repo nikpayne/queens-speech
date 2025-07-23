@@ -4,13 +4,22 @@ interface ArticleStationaryProps {
   content: string;
   title?: string;
   showSignature?: boolean;
+  error?: string;
 }
 
 export default function ArticleStationary({
   content,
   title = "",
   showSignature = false,
+  error = "",
 }: ArticleStationaryProps) {
+  const textStyling = {
+    fontFamily: "monospace",
+    fontSize: "sm",
+    lineHeight: "1.8",
+    whiteSpace: "pre-wrap",
+    color: "gray.800",
+  };
   return (
     <Stack
       bg="#FCFCF1"
@@ -22,6 +31,7 @@ export default function ArticleStationary({
       fontFamily="monospace"
       minH="900px"
       justifyContent="space-between"
+      gap={6}
     >
       <Stack direction="column" gap={6}>
         {/* Header section for Buckingham Palace logo */}
@@ -44,19 +54,21 @@ export default function ArticleStationary({
 
         {/* Article content */}
         <Box>
-          <Text
-            fontFamily="monospace"
-            fontSize="sm"
-            lineHeight="1.8"
-            whiteSpace="pre-wrap"
-            color="gray.800"
-          >
-            {content}
-          </Text>
+          <Text {...textStyling}>{content}</Text>
+          {error && (
+            <Text {...textStyling} color="red.500">
+              {error}
+            </Text>
+          )}
         </Box>
       </Stack>
 
-      <HStack gap="6" alignItems="flex-start">
+      <HStack
+        gap="6"
+        // alignItems="flex-start"
+
+        alignItems="stretch"
+      >
         <Flex>
           {/* Please put the title here */}
           <Text
@@ -64,6 +76,7 @@ export default function ArticleStationary({
             fontSize="sm"
             fontFamily="'Homemade Apple', 'Beth Ellen', 'La Belle Aurore', serif"
             transform="rotate(-0.1deg)"
+            py={2}
           >
             {title.toLowerCase()}
           </Text>

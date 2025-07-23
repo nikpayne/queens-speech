@@ -1,7 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Box, Image, Container, Stack, Text, HStack } from "@chakra-ui/react";
+import {
+  Box,
+  Image,
+  Container,
+  Stack,
+  Text,
+  HStack,
+  Flex,
+  Grid,
+  GridItem,
+} from "@chakra-ui/react";
 import DesktopWindow from "@/components/DesktopWindow";
 import MemoNotepad from "@/components/MemoNotepad";
 import Toast from "@/components/Toast";
@@ -163,111 +173,63 @@ export default function Home() {
   );
 
   return (
-    <Box minH="100vh" py={8} bg="gray.50" position="relative">
-      <Container maxW="5xl" mx="auto">
-        <Stack gap={6}>
-          {/* Main Content - Side by Side Layout */}
-          <HStack
-            gap={8}
-            align="start"
-            flexWrap={{ base: "wrap", lg: "nowrap" }}
-          >
-            {/* Left Side - Notepad and Fountain Pen */}
-            <HStack gap={4} align="start" position="sticky">
-              {/* Memo Notepad */}
-              <MemoNotepad
-                userInput={userInput}
-                onUserInputChange={setUserInput}
-                onGenerate={handleGenerate}
-                isLoading={isLoading}
-              />
-            </HStack>
-
-            {/* Desktop Window - Right Side */}
-            <Box flex="1" minW="600px">
-              {/* Latest generation */}
-              <ArticleStationary
-                content={articleContent}
-                title={articleTitle}
-                showSignature={showSignature}
-              />
-
-              {/* Error state */}
-              {result && !result.success && (
-                <Box
-                  bg="red.50"
-                  border="1px solid"
-                  borderColor="red.200"
-                  p={4}
-                  borderRadius="md"
-                  m={4}
-                >
-                  <Text color="red.800" fontWeight="bold">
-                    Generation Failed!
-                  </Text>
-                  <Text color="red.700" mt={1}>
-                    {result.error}
-                  </Text>
-                </Box>
+    <Grid
+      gridTemplateAreas={{
+        base: `
+          "notepad"
+          "article"
+          "other"
+        `,
+        lg: `
+          "notepad article other"
+        `,
+      }}
+      gridTemplateColumns={{
+        base: `1fr`,
+        lg: `2fr 4.5fr 2fr`,
+      }}
+      maxW="8xl"
+      mx="auto"
+      py="8"
+      gap="6"
+      px="6"
+    >
+      <GridItem area="notepad" position="relative">
+        {/* I want box to be sticky */}
+        <Box>
+          <MemoNotepad
+            userInput={userInput}
+            onUserInputChange={setUserInput}
+            onGenerate={handleGenerate}
+            isLoading={isLoading}
+          />
+        </Box>
+      </GridItem>
+      <GridItem area="article">
+        <Stack>
+          <ArticleStationary
+            content={articleContent}
+            title={articleTitle}
+            showSignature={showSignature}
+            error={result?.error}
+          />
+          {generationHistory.length > 0 && !isLoading && !streamingContent && (
+            <Stack gap={6} mt={8}>
+              {(result ? generationHistory.slice(1) : generationHistory).map(
+                (generation) => (
+                  <ArticleStationary
+                    key={generation.title}
+                    content={generation.content}
+                    title={generation.title}
+                    showSignature={true}
+                  />
+                )
               )}
-
-              {/* Previous Generations */}
-              {generationHistory.length > 0 &&
-                !isLoading &&
-                !streamingContent && (
-                  <Stack gap={6} mt={8}>
-                    {(result
-                      ? generationHistory.slice(1)
-                      : generationHistory
-                    ).map((generation) => (
-                      <ArticleStationary
-                        key={generation.title}
-                        content={generation.content}
-                        title={generation.title}
-                        showSignature={true}
-                      />
-                    ))}
-                  </Stack>
-                )}
-            </Box>
-          </HStack>
-
-          {/* Reference Info at Bottom */}
-          {/* <Stack gap={4}>
-            {result &&
-              result.usedReferences &&
-              result.usedReferences.length > 0 && (
-                <Box>
-                  <Text fontSize="sm" fontWeight="semibold" mb={2}>
-                    📚 Style References Used:
-                  </Text>
-                  <Stack direction="row" gap={2} flexWrap="wrap">
-                    {result.usedReferences.map((ref, index) => (
-                      <Box
-                        key={index}
-                        bg="purple.100"
-                        color="purple.800"
-                        px={2}
-                        py={1}
-                        borderRadius="md"
-                        fontSize="xs"
-                      >
-                        {ref.filename}
-                      </Box>
-                    ))}
-                  </Stack>
-                </Box>
-              )}
-          </Stack> */}
+            </Stack>
+          )}
         </Stack>
-      </Container>
-
-      {/* Toast Notification */}
-      <Toast
-        message="The Queen's speech was copied to clipboard! 👑"
-        isVisible={showToast}
-        onClose={handleCloseToast}
-      />
-    </Box>
+      </GridItem>
+      <GridItem area="other"></GridItem>
+    </Grid>
   );
 }

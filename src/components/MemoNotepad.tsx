@@ -4,7 +4,8 @@ import {
   Textarea,
   Button,
   Image,
-  Presence,
+  Flex,
+  useBreakpointValue,
 } from "@chakra-ui/react";
 import { useMemo } from "react";
 
@@ -25,7 +26,9 @@ export default function MemoNotepad({
   const loadingMessage = useMemo(() => {
     const randomIndex = Math.floor(Math.random() * LOADING_PHRASES.length);
     return LOADING_PHRASES[randomIndex];
-  }, [isLoading]); // Re-pick when loading state changes
+  }, []); // Re-pick when loading state changes
+
+  const isMobile = useBreakpointValue({ base: true, lg: false });
 
   return (
     <Stack
@@ -33,23 +36,29 @@ export default function MemoNotepad({
       borderRadius="sm"
       boxShadow="md"
       p={6}
-      minW="320px"
-      maxW="320px"
-      minH="500px"
+      w="100%"
+      minH={isMobile ? "300px" : "500px"}
       position="relative"
-      transform="rotate(-0.5deg) translateY(2px)"
+      transform={!isMobile ? "rotate(-0.2deg) translateY(3px)" : "none"}
+      maxW="500px"
+      mx="auto"
     >
       <Stack gap={4}>
-        <Box textAlign="center" pt={2} pb={4} position="relative" zIndex={1}>
+        <Flex
+          justifyContent={isMobile ? "flex-start" : "center"}
+          flexDirection="row"
+          pt={2}
+          pb={4}
+          w="100%"
+        >
           <Image
             src="/buckingham-palace.svg"
             alt="Buckingham Palace"
             h="60px"
             w="auto"
-            mx="auto"
             objectFit="contain"
           />
-        </Box>
+        </Flex>
 
         {/* Notepad Lines and Input */}
         <Box position="relative" zIndex={1}>
@@ -65,7 +74,7 @@ export default function MemoNotepad({
                 }
               }
             }}
-            rows={12}
+            rows={isMobile ? 6 : 12}
             autoresize
             maxLength={2000}
             bg="transparent"
@@ -86,29 +95,22 @@ export default function MemoNotepad({
             pt={1}
           />
 
-          <Presence
-            present={isLoading || userInput.trim().length > 0}
-            animationName={{
-              _open: "scale-fade-in",
-              _closed: "scale-fade-out",
-            }}
-            animationDuration="moderate"
+          <Button
+            onClick={onGenerate}
+            variant="outline"
+            borderRadius="sm"
+            w="full"
+            fontSize="md"
+            // fontFamily="'Beth Ellen', 'La Belle Aurore', serif"
+            fontFamily="'Cormorant SC', 'Playfair Display', serif"
+            fontWeight="bold"
+            bg="blackAlpha.100"
+            loading={isLoading}
+            disabled={isLoading || !userInput.trim()}
+            loadingText={loadingMessage}
           >
-            <Button
-              onClick={onGenerate}
-              variant="outline"
-              borderRadius="sm"
-              w="full"
-              fontSize="sm"
-              fontFamily="'Beth Ellen', 'La Belle Aurore', serif"
-              bg="blackAlpha.100"
-              loading={isLoading}
-              disabled={isLoading || userInput.trim().length === 0}
-              loadingText={loadingMessage}
-            >
-              Compose royal thoughts
-            </Button>
-          </Presence>
+            compose royal thoughts
+          </Button>
         </Box>
       </Stack>
     </Stack>
