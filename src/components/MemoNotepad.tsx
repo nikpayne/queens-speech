@@ -27,6 +27,9 @@ function AnimatedLoadingText({ text }: AnimatedLoadingTextProps) {
       transform: translateX(0);
     }
   `;
+  const TOTAL_DURATION = 2; // seconds
+  const numchars = text.length;
+  const durationPerChar = TOTAL_DURATION / numchars;
 
   return (
     <Text
@@ -45,7 +48,9 @@ function AnimatedLoadingText({ text }: AnimatedLoadingTextProps) {
           opacity={0}
           transform="translateX(1em)"
           css={{
-            animation: `${slideIn} 1s ease-out ${index * 0.2}s both`,
+            animation: `${slideIn} ${durationPerChar}s ease-out ${
+              index * durationPerChar
+            }s both`,
           }}
         >
           {char === " " ? "\u00A0" : char}
