@@ -9,6 +9,20 @@ const anthropic = new Anthropic({
 
 export type GenerationMode = "write" | "refine";
 
+function generateRefineTitle(userInput: string): string {
+  // Take first few words of user input and create a descriptive title
+  const words = userInput.trim().split(/\s+/).slice(0, 6);
+  const preview = words.join(' ');
+  
+  // Truncate if too long and add ellipsis
+  const maxLength = 50;
+  if (preview.length > maxLength) {
+    return `Refined: ${preview.substring(0, maxLength - 12)}...`;
+  }
+  
+  return `Refined: ${preview}`;
+}
+
 interface GenerationRequest {
   userInput: string;
   mode: GenerationMode;
@@ -57,48 +71,62 @@ export async function generateQueenElizabethClickhole(
           const text = chunk.delta.text;
           fullContent += text;
 
-          if (!foundTitleMarker) {
-            // Check if we've hit the title marker
-            const titleMarkerIndex = fullContent.indexOf('TITLE:');
-            if (titleMarkerIndex !== -1) {
-              // Found the title marker
-              foundTitleMarker = true;
-              body = fullContent.substring(0, titleMarkerIndex).trim();
-              
-              // Start collecting title after "TITLE:"
-              const afterMarker = fullContent.substring(titleMarkerIndex + 6).trim();
-              if (afterMarker) {
-                title = afterMarker;
-                onChunk(afterMarker, true); // Send title chunk
+          if (mode === 'refine') {
+            // For refine mode, everything is body content (no title expected)
+            onChunk(text, false);
+          } else {
+            // For write mode, look for title marker
+            if (!foundTitleMarker) {
+              // Check if we've hit the title marker
+              const titleMarkerIndex = fullContent.indexOf('TITLE:');
+              if (titleMarkerIndex !== -1) {
+                // Found the title marker
+                foundTitleMarker = true;
+                body = fullContent.substring(0, titleMarkerIndex).trim();
+                
+                // Start collecting title after "TITLE:"
+                const afterMarker = fullContent.substring(titleMarkerIndex + 6).trim();
+                if (afterMarker) {
+                  title = afterMarker;
+                  onChunk(afterMarker, true); // Send title chunk
+                }
+              } else {
+                // Still in body content, stream it
+                onChunk(text, false);
               }
             } else {
-              // Still in body content, stream it
-              onChunk(text, false);
+              // We're collecting title content
+              title += text;
+              onChunk(text, true); // Stream title chunks
             }
-          } else {
-            // We're collecting title content
-            title += text;
-            onChunk(text, true); // Stream title chunks
           }
         }
       }
 
-      // Parse final result
-      const titleMarkerIndex = fullContent.indexOf('TITLE:');
-      let finalTitle = "Generated Article";
-      let finalBody = "Article content not found";
+      // Parse final result based on mode
+      let finalTitle: string;
+      let finalBody: string;
       
-      if (titleMarkerIndex !== -1) {
-        finalBody = fullContent.substring(0, titleMarkerIndex).trim();
-        finalTitle = fullContent.substring(titleMarkerIndex + 6).trim();
-      } else {
-        // Fallback: treat entire content as body
+      if (mode === 'refine') {
+        // For refine mode, entire content is body, generate a descriptive title
         finalBody = fullContent.trim();
+        finalTitle = generateRefineTitle(userInput);
+      } else {
+        // For write mode, look for title marker
+        const titleMarkerIndex = fullContent.indexOf('TITLE:');
+        if (titleMarkerIndex !== -1) {
+          finalBody = fullContent.substring(0, titleMarkerIndex).trim();
+          finalTitle = fullContent.substring(titleMarkerIndex + 6).trim();
+        } else {
+          // Fallback: treat entire content as body
+          finalBody = fullContent.trim();
+          finalTitle = "Generated Article";
+        }
       }
       
       return {
-        title: finalTitle,
-        body: finalBody
+        title: finalTitle || (mode === 'refine' ? generateRefineTitle(userInput) : "Generated Article"),
+        body: finalBody || "Content not found"
       };
     } else {
       // Handle non-streaming response (fallback)
@@ -119,23 +147,30 @@ export async function generateQueenElizabethClickhole(
       if (content.type === 'text') {
         const responseText = content.text.trim();
         
-        // Look for the title marker
-        const titleMarkerIndex = responseText.indexOf('TITLE:');
-        let title = "Generated Article";
-        let body = "Article content not found";
+        let title: string;
+        let body: string;
         
-        if (titleMarkerIndex !== -1) {
-          // Split at the title marker
-          body = responseText.substring(0, titleMarkerIndex).trim();
-          title = responseText.substring(titleMarkerIndex + 6).trim();
-        } else {
-          // Fallback: treat entire content as body
+        if (mode === 'refine') {
+          // For refine mode, entire content is body, generate a descriptive title
           body = responseText;
+          title = generateRefineTitle(userInput);
+        } else {
+          // For write mode, look for the title marker
+          const titleMarkerIndex = responseText.indexOf('TITLE:');
+          if (titleMarkerIndex !== -1) {
+            // Split at the title marker
+            body = responseText.substring(0, titleMarkerIndex).trim();
+            title = responseText.substring(titleMarkerIndex + 6).trim();
+          } else {
+            // Fallback: treat entire content as body
+            body = responseText;
+            title = "Generated Article";
+          }
         }
         
         return {
-          title: title || "Generated Article",
-          body: body || "Article content not found"
+          title: title || (mode === 'refine' ? generateRefineTitle(userInput) : "Generated Article"),
+          body: body || "Content not found"
         };
       } else {
         throw new Error('Unexpected response type from Anthropic API');

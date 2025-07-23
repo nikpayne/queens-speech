@@ -51,7 +51,9 @@ export function pickRelevantReferences(
     // Score based on keyword matches
     keywords.forEach(keyword => {
       if (keyword.length > 2) { // Skip very short words
-        const matches = (refText.match(new RegExp(keyword, 'g')) || []).length;
+        // Escape special regex characters to prevent invalid regex
+        const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const matches = (refText.match(new RegExp(escapedKeyword, 'g')) || []).length;
         score += matches;
       }
     });

@@ -140,6 +140,7 @@ export default function Home() {
                 if (accumulatedTitle && accumulatedContent) {
                   saveGeneration({
                     prompt: userInput,
+                    mode: mode,
                     title: accumulatedTitle,
                     content: accumulatedContent,
                     usedReferences: usedReferences,
@@ -186,8 +187,9 @@ export default function Home() {
   return (
     <Box
       minH="100vh"
-      bgImage="url('https://media1.thehungryjpeg.com/thumbs2/ori_112089_038b9609023e963d7cc9d48242cb5541e9d03ff5_20-dark-wood-background-textures.jpg')"
-      bgAttachment="fixed"
+      // bgImage="url('https://media1.thehungryjpeg.com/thumbs2/ori_112089_038b9609023e963d7cc9d48242cb5541e9d03ff5_20-dark-wood-background-textures.jpg')"
+      // bgAttachment="fixed"
+      bg="rgb(47, 13, 2)"
       bgSize="cover"
       bgRepeat="no-repeat"
     >
