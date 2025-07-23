@@ -181,21 +181,28 @@ export default function Home() {
   );
 
   return (
-    <Box bg="gray.50" minH="100vh">
+    <Box
+      minH="100vh"
+      bgImage="url('https://media1.thehungryjpeg.com/thumbs2/ori_112089_038b9609023e963d7cc9d48242cb5541e9d03ff5_20-dark-wood-background-textures.jpg')"
+      bgAttachment="fixed"
+      bgSize="cover"
+      bgRepeat="no-repeat"
+    >
       <Grid
         gridTemplateAreas={{
           base: `
+          "pen"
           "notepad"
           "article"
           "other"
         `,
           lg: `
-          "notepad article other"
+          "pen notepad article other ."
         `,
         }}
         gridTemplateColumns={{
           base: `1fr`,
-          lg: `2fr 4.5fr 2fr`,
+          lg: `40px 2fr 4.5fr 2fr 40px`,
         }}
         maxW="8xl"
         mx="auto"
@@ -203,6 +210,15 @@ export default function Home() {
         gap="6"
         px="6"
       >
+        <GridItem area="pen" maxH={{ base: "40px", lg: "auto" }}>
+          <Image
+            src="/fountain-pen.png"
+            w={"40px"}
+            position="relative"
+            top="16px"
+            transform={{ base: "rotate(90deg)", lg: "rotate(-1deg)" }}
+          />
+        </GridItem>
         <GridItem area="notepad" position="relative">
           {/* I want box to be sticky */}
           <Box>
@@ -220,6 +236,7 @@ export default function Home() {
               content={articleContent}
               title={articleTitle}
               showSignature={showSignature}
+              showPaperHolders={true}
               error={result?.error}
             />
             {generationHistory.length > 0 &&

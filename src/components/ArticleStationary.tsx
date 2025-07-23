@@ -15,6 +15,7 @@ interface ArticleStationaryProps {
   content: string;
   title?: string;
   showSignature?: boolean;
+  showPaperHolders?: boolean;
   error?: string;
   onDelete?: () => void;
   onCopy?: () => void;
@@ -24,6 +25,7 @@ export default function ArticleStationary({
   content,
   title = "",
   showSignature = false,
+  showPaperHolders = false,
   error = "",
   onDelete,
   onCopy,
@@ -65,12 +67,15 @@ export default function ArticleStationary({
       minH="900px"
       justifyContent="space-between"
       gap={6}
-      filter={!content ? "blur(1.5px)" : "none"}
-      transition="filter 0.3s ease-in-out"
+      // filter={!content ? "blur(1.5px)" : "none"}
+      // transition="filter 0.3s ease-in-out"
       position="relative"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
+      {/* Paper holders at corners */}
+      {showPaperHolders && <PaperHolders />}
+
       {/* Copy and Delete buttons - only shown on hover and for finished generations */}
       {showButtons && (
         <ButtonGroup
@@ -167,3 +172,49 @@ export default function ArticleStationary({
     </Stack>
   );
 }
+
+const PaperHolders = () => {
+  // Paper holder triangle styles
+  const OFFSET = 2;
+  const PAPER_HOLDER_SIZE = 16;
+  const paperHolderStyle = {
+    position: "absolute" as const,
+    width: PAPER_HOLDER_SIZE,
+    height: PAPER_HOLDER_SIZE,
+    bg: "#2D3748",
+    zIndex: 10,
+  };
+
+  return (
+    <>
+      {/* Top-left corner */}
+      <Box
+        {...paperHolderStyle}
+        top={`-${OFFSET}`}
+        left={`-${OFFSET}`}
+        clipPath="polygon(0 0, 100% 0, 0 100%)"
+      />
+      {/* Top-right corner */}
+      <Box
+        {...paperHolderStyle}
+        top={`-${OFFSET}`}
+        right={`-${OFFSET}`}
+        clipPath="polygon(100% 0, 100% 100%, 0 0)"
+      />
+      {/* Bottom-left corner */}
+      <Box
+        {...paperHolderStyle}
+        bottom={`-${OFFSET}`}
+        left={`-${OFFSET}`}
+        clipPath="polygon(0 0, 100% 100%, 0 100%)"
+      />
+      {/* Bottom-right corner */}
+      <Box
+        {...paperHolderStyle}
+        bottom={`-${OFFSET}`}
+        right={`-${OFFSET}`}
+        clipPath="polygon(100% 0, 100% 100%, 0 100%)"
+      />
+    </>
+  );
+};
