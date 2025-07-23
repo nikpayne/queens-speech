@@ -58,4 +58,17 @@ export function clearGenerationHistory(): void {
     localStorage.removeItem(STORAGE_KEY);
     console.log('Cleared generation history from localStorage');
   }
+}
+
+export function deleteGeneration(id: string): void {
+  if (typeof window !== 'undefined') {
+    try {
+      const history = getGenerationHistory();
+      const updatedHistory = history.filter(generation => generation.id !== id);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedHistory));
+      console.log('Deleted generation from localStorage:', id);
+    } catch (error) {
+      console.error('Error deleting generation:', error);
+    }
+  }
 } 

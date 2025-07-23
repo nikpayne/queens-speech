@@ -193,19 +193,20 @@ export default function MemoNotepad({
 
           <Button
             onClick={onGenerate}
-            variant="outline"
+            variant="solid"
+            // bg="blackAlpha.100"
             borderRadius="sm"
             w="full"
-            fontSize="md"
-            // fontFamily="'Beth Ellen', 'La Belle Aurore', serif"
-            fontFamily="'Cormorant SC', 'Playfair Display', serif"
-            fontWeight="bold"
-            bg="blackAlpha.100"
+            fontSize="lg"
+            // fontFamily="'Homemade Apple','Cormorant SC', 'Playfair Display', serif"
+            // fontFamily="'Cormorant SC', 'Playfair Display', serif"
+            fontFamily="UnifrakturMaguntia"
+            // fontWeight="bold"
             loading={isLoading}
             disabled={isLoading || !userInput.trim()}
-            letterSpacing="0.02em"
+            // letterSpacing="0.1em"
           >
-            compose royal thoughts
+            Give to the Queen
           </Button>
 
           {isLoading && <AnimatedLoadingText text={loadingMessage} />}

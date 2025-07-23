@@ -1,10 +1,23 @@
-import { Box, HStack, Flex, Text, Stack, Image } from "@chakra-ui/react";
+import {
+  Box,
+  HStack,
+  Flex,
+  Text,
+  Stack,
+  Image,
+  IconButton,
+  ButtonGroup,
+} from "@chakra-ui/react";
+import { MdContentCopy, MdDelete } from "react-icons/md";
+import { useState } from "react";
 
 interface ArticleStationaryProps {
   content: string;
   title?: string;
   showSignature?: boolean;
   error?: string;
+  onDelete?: () => void;
+  onCopy?: () => void;
 }
 
 export default function ArticleStationary({
@@ -12,7 +25,11 @@ export default function ArticleStationary({
   title = "",
   showSignature = false,
   error = "",
+  onDelete,
+  onCopy,
 }: ArticleStationaryProps) {
+  const [isHovered, setIsHovered] = useState(false);
+
   const textStyling = {
     fontFamily: "monospace",
     fontSize: "sm",
@@ -20,13 +37,29 @@ export default function ArticleStationary({
     whiteSpace: "pre-wrap",
     color: "gray.800",
   };
+
+  const handleCopy = () => {
+    if (onCopy && content) {
+      navigator.clipboard
+        .writeText(content)
+        .then(() => {
+          onCopy();
+        })
+        .catch((err) => {
+          console.error("Failed to copy content: ", err);
+        });
+    }
+  };
+
+  const showButtons = showSignature && (onDelete || onCopy);
+
   return (
     <Stack
       bg="#FCFCF1"
       p={8}
-      borderRadius="md"
-      border="1px solid #E2E8F0"
-      boxShadow="lg"
+      borderRadius="sm"
+      border="1px solid hsl(60, 30.70%, 92%)"
+      boxShadow="md"
       maxW="full"
       fontFamily="monospace"
       minH="900px"
@@ -34,7 +67,46 @@ export default function ArticleStationary({
       gap={6}
       filter={!content ? "blur(1.5px)" : "none"}
       transition="filter 0.3s ease-in-out"
+      position="relative"
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
     >
+      {/* Copy and Delete buttons - only shown on hover and for finished generations */}
+      {showButtons && (
+        <ButtonGroup
+          size="sm"
+          variant="ghost"
+          position="absolute"
+          top={4}
+          right={4}
+          opacity={isHovered ? 1 : 0}
+          transition="opacity 0.2s ease-in-out"
+          bg="white"
+          boxShadow="sm"
+          borderRadius="md"
+          p={1}
+        >
+          {onCopy && (
+            <IconButton
+              aria-label="Copy article"
+              onClick={handleCopy}
+              _hover={{ bg: "gray.100" }}
+            >
+              <MdContentCopy />
+            </IconButton>
+          )}
+          {onDelete && (
+            <IconButton
+              aria-label="Delete article"
+              onClick={onDelete}
+              _hover={{ bg: "red.100", color: "red.600" }}
+            >
+              <MdDelete />
+            </IconButton>
+          )}
+        </ButtonGroup>
+      )}
+
       <Stack direction="column" gap={6}>
         {/* Header section for Buckingham Palace logo */}
         <Box textAlign="center" py={4}>

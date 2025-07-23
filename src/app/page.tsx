@@ -18,6 +18,7 @@ import ArticleStationary from "@/components/ArticleStationary";
 import {
   saveGeneration,
   getGenerationHistory,
+  deleteGeneration,
   GenerationHistory,
 } from "@/lib/storage";
 
@@ -41,12 +42,25 @@ export default function Home() {
   const [generationHistory, setGenerationHistory] = useState<
     GenerationHistory[]
   >([]);
+  // For now, we'll use a simple feedback system without toast
+  // const toast = useToast();
 
   useEffect(() => {
     // Load generation history on component mount
     const history = getGenerationHistory();
     setGenerationHistory(history);
   }, []);
+
+  const handleDelete = (id: string) => {
+    deleteGeneration(id);
+    const updatedHistory = getGenerationHistory();
+    setGenerationHistory(updatedHistory);
+    console.log("Article deleted successfully");
+  };
+
+  const handleCopy = () => {
+    console.log("Article copied to clipboard");
+  };
 
   const handleGenerate = async () => {
     if (!userInput.trim()) {
@@ -167,63 +181,70 @@ export default function Home() {
   );
 
   return (
-    <Grid
-      gridTemplateAreas={{
-        base: `
+    <Box bg="gray.50" minH="100vh">
+      <Grid
+        gridTemplateAreas={{
+          base: `
           "notepad"
           "article"
           "other"
         `,
-        lg: `
+          lg: `
           "notepad article other"
         `,
-      }}
-      gridTemplateColumns={{
-        base: `1fr`,
-        lg: `2fr 4.5fr 2fr`,
-      }}
-      maxW="8xl"
-      mx="auto"
-      py="8"
-      gap="6"
-      px="6"
-    >
-      <GridItem area="notepad" position="relative">
-        {/* I want box to be sticky */}
-        <Box>
-          <MemoNotepad
-            userInput={userInput}
-            onUserInputChange={setUserInput}
-            onGenerate={handleGenerate}
-            isLoading={isLoading}
-          />
-        </Box>
-      </GridItem>
-      <GridItem area="article">
-        <Stack>
-          <ArticleStationary
-            content={articleContent}
-            title={articleTitle}
-            showSignature={showSignature}
-            error={result?.error}
-          />
-          {generationHistory.length > 0 && !isLoading && !streamingContent && (
-            <Stack gap={6} mt={8}>
-              {(result ? generationHistory.slice(1) : generationHistory).map(
-                (generation) => (
-                  <ArticleStationary
-                    key={generation.title}
-                    content={generation.content}
-                    title={generation.title}
-                    showSignature={true}
-                  />
-                )
+        }}
+        gridTemplateColumns={{
+          base: `1fr`,
+          lg: `2fr 4.5fr 2fr`,
+        }}
+        maxW="8xl"
+        mx="auto"
+        py="8"
+        gap="6"
+        px="6"
+      >
+        <GridItem area="notepad" position="relative">
+          {/* I want box to be sticky */}
+          <Box>
+            <MemoNotepad
+              userInput={userInput}
+              onUserInputChange={setUserInput}
+              onGenerate={handleGenerate}
+              isLoading={isLoading}
+            />
+          </Box>
+        </GridItem>
+        <GridItem area="article">
+          <Stack>
+            <ArticleStationary
+              content={articleContent}
+              title={articleTitle}
+              showSignature={showSignature}
+              error={result?.error}
+            />
+            {generationHistory.length > 0 &&
+              !isLoading &&
+              !streamingContent && (
+                <Stack gap={6} mt={8}>
+                  {(result
+                    ? generationHistory.slice(1)
+                    : generationHistory
+                  ).map((generation) => (
+                    <ArticleStationary
+                      key={generation.id}
+                      content={generation.content}
+                      title={generation.title}
+                      showSignature={true}
+                      onDelete={() => handleDelete(generation.id)}
+                      onCopy={handleCopy}
+                    />
+                  ))}
+                </Stack>
               )}
-            </Stack>
-          )}
-        </Stack>
-      </GridItem>
-      <GridItem area="other"></GridItem>
-    </Grid>
+          </Stack>
+        </GridItem>
+        <GridItem area="other"></GridItem>
+      </Grid>
+    </Box>
   );
 }
