@@ -2,6 +2,7 @@ import {
   Box,
   Stack,
   Textarea,
+  HStack,
   Button,
   Image,
   Flex,
@@ -9,7 +10,7 @@ import {
   Text,
 } from "@chakra-ui/react";
 import { keyframes } from "@emotion/react";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { LOADING_PHRASES } from "./constants";
 
 interface AnimatedLoadingTextProps {
@@ -80,6 +81,7 @@ export default function MemoNotepad({
   }, []); // Re-pick when loading state changes
 
   const isMobile = useBreakpointValue({ base: true, lg: false });
+  const [mode, setMode] = useState<"write" | "refine">("write");
 
   return (
     <Stack
@@ -125,7 +127,7 @@ export default function MemoNotepad({
                 }
               }
             }}
-            rows={isMobile ? 6 : 12}
+            rows={isMobile ? 6 : 10}
             autoresize
             maxLength={2000}
             bg="transparent"
@@ -145,6 +147,49 @@ export default function MemoNotepad({
             p={0}
             pt={1}
           />
+
+          <HStack w="100%" justifyContent="center" py="4">
+            {(["write", "refine"] as const).map((modeOption) => (
+              <Box
+                key={modeOption}
+                position="relative"
+                cursor="pointer"
+                minW="6em"
+                onClick={() => setMode(modeOption)}
+              >
+                {mode === modeOption && (
+                  <Image
+                    src="/circle.png"
+                    alt="Selected"
+                    position="absolute"
+                    top="35%"
+                    left="45%"
+                    transform="translate(-50%, -50%)"
+                    w="auto"
+                    h="2em"
+                    // objectFit="contain"
+                    zIndex={0}
+                    opacity={0.5}
+                  />
+                )}
+                <Text
+                  fontSize="md"
+                  fontFamily="'Homemade Apple', 'Beth Ellen', 'La Belle Aurore', serif"
+                  textAlign="center"
+                  // position="relative"
+                  // zIndex={1}
+                  color={mode === modeOption ? "gray.800" : "gray.500"}
+                  fontWeight={mode === modeOption ? "bold" : "normal"}
+                  transition="all 0.2s ease"
+                  _hover={{
+                    color: "gray.700",
+                  }}
+                >
+                  {modeOption}
+                </Text>
+              </Box>
+            ))}
+          </HStack>
 
           <Button
             onClick={onGenerate}
