@@ -186,4 +186,5 @@ export const queenNotifications = [
   { title: "Royal Memory Care", message: "Daily briefing: You knight people with a sword. This is called an investiture.", time: "3 months ago", emoji: "⚔️" },
   { title: "Royal Memory Care", message: "Daily briefing: You own all the swans on the River Thames. This is an old law.", time: "3 months ago", emoji: "🦢" },
   { title: "Royal Memory Care", message: "Important: Parliament makes laws. No need to personally arrest lawbreakers.", time: "3 months ago", emoji: "🏛️" },
+  { title: "Palace Theater", message: "‘Sword Juggler 3D’ may not be age-appropriate.", time: "3 days ago", emoji: "🎥" }
 ];
