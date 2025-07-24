@@ -7,6 +7,7 @@ interface NotificationProps {
   title: string;
   message: string;
   time: string;
+  emoji: string;
   isNew?: boolean;
 }
 
@@ -16,18 +17,14 @@ interface QueensPhoneProps {
 
 const expandNotification = keyframes`
   from {
-    height: 0;
-    opacity: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    margin-bottom: 0;
+    transform: scale(0),
+    opacity: 0,
+    height: auto
   }
   to {
-    height: auto;
-    opacity: 1;
-    padding-top: 0.75em;
-    padding-bottom: 0.75em;
-    margin-bottom: 0.5em;
+    transform: scale(1),
+    opacity: 1,
+    height: auto
   }
 `;
 
@@ -35,25 +32,9 @@ const Notification: React.FC<NotificationProps> = ({
   title,
   message,
   time,
+  emoji,
   isNew,
 }) => {
-  // Generate a random icon emoji/character for variety
-  const icons = [
-    "👑",
-    "🐕",
-    "🏰",
-    "📱",
-    "🍪",
-    "💎",
-    "🎭",
-    "🌟",
-    "📊",
-    "🔒",
-    "👨‍🍳",
-    "💂",
-  ];
-  const randomIcon = icons[Math.floor(Math.random() * icons.length)];
-
   return (
     <Box
       bg="rgba(255, 255, 255, 0.85)"
@@ -75,7 +56,7 @@ const Notification: React.FC<NotificationProps> = ({
           fontSize="1.2em"
           flexShrink={0}
         >
-          {randomIcon}
+          {emoji}
         </Circle>
         <VStack align="flex-start" gap="0.1em" flex={1} minW={0}>
           <HStack justify="space-between" w="100%">
@@ -237,6 +218,7 @@ const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16 }) => {
                 title={notification.title}
                 message={notification.message}
                 time={notification.time}
+                emoji={notification.emoji}
                 isNew={notification.isNew}
               />
             ))}
