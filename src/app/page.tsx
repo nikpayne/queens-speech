@@ -145,8 +145,8 @@ export default function Home() {
         gap="6"
         px="4"
       >
-        <GridItem area="pen" pt="10vh">
-          <Box transform="rotate(-0.4deg)">
+        <GridItem area="pen" pt={{ base: undefined, lg: "10vh" }}>
+          <Box transform={{ base: undefined, lg: "rotate(-0.4deg)" }}>
             <Image
               src={penImage}
               alt="Fountain Pen"
@@ -156,9 +156,18 @@ export default function Home() {
             />
           </Box>
         </GridItem>
-        <GridItem area="notepad" position="relative" pt="12vh">
+        <GridItem
+          area="notepad"
+          position="relative"
+          pt={{ base: undefined, lg: "12vh" }}
+        >
           {/* I want box to be sticky */}
-          <Box transform={"rotate(-0.3deg) translateY(3px)"}>
+          <Box
+            transform={{
+              base: undefined,
+              lg: "rotate(-0.3deg) translateY(3px)",
+            }}
+          >
             <MemoNotepad
               userInput={userInput}
               mode={mode}
@@ -169,9 +178,9 @@ export default function Home() {
             />
           </Box>
         </GridItem>
-        <GridItem area="phone" pt="10vh">
+        <GridItem area="phone" pt={{ base: undefined, lg: "10vh" }}>
           <Flex
-            transform="rotate(0.5deg)"
+            transform={{ base: undefined, lg: "rotate(0.5deg)" }}
             justifyContent="center"
             alignItems="center"
           >
@@ -190,6 +199,7 @@ export default function Home() {
             />
           </Stack>
         </GridItem>
+
         <GridItem area="history">
           {generationHistory.length > 0 && !isLoading && !streamingContent && (
             <Stack gap={6} mt={8}>
