@@ -34,12 +34,9 @@ export default function MemoNotepad({
   return (
     <Stack
       bg="white"
+      p={6}
       borderRadius="sm"
       boxShadow="md"
-      p={6}
-      w="100%"
-      position="relative"
-      transform={!isMobile ? "rotate(-0.2deg) translateY(3px)" : "none"}
       maxW="500px"
       mx="auto"
     >

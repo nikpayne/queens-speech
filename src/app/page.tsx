@@ -90,47 +90,11 @@ export default function Home() {
     lg: "/fountain-pen.png",
   });
 
-  //   const scaleHeight = keyframes`
-  //   from {
-  //     grid-template-rows: 0fr;
-  //     max-height: 0;
-  //     overflow: hidden;
-  //     opacity: 0;
-  //   }
-  //   to {
-  //     grid-template-rows: 1fr;
-  //     max-height: 5000px;
-  //     overflow: hidden;
-  //     opacity: 1;
-  //   }
-  // `;
-  const scaleHeight = keyframes`
-from {
-  max-height: 0px
-}
-to { 
-  max-height: 1000px;
-}
-`;
-
-  // return (
-  //   <Stack bg="red">
-  //     <Box
-  //       height="auto"
-  //       animation={`${scaleHeight} ${4000}ms ease-out forwards`}
-  //       animationTimingFunction="ease-out"
-  //       bg="blue"
-  //       overflow="hidden"
-  //     >
-  //       <Box p="4">
-  //         <Text>Hello</Text>
-  //       </Box>
-  //     </Box>
-  //     <Box p="4">
-  //       <Text>Hello</Text>
-  //     </Box>
-  //   </Stack>
-  // );
+  const centerStyling = {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  };
 
   return (
     <Box
@@ -163,10 +127,12 @@ to {
           "pen"
           "notepad"
           "article"
-          "other"
+          "history"
+          "phone"
         `,
           lg: `
-          "pen notepad article other other"
+          "pen notepad article phone ."
+          ". . history . ."
         `,
         }}
         gridTemplateColumns={{
@@ -179,25 +145,20 @@ to {
         gap="6"
         px="4"
       >
-        <GridItem
-          area="pen"
-          // maxH={{ base: "40px", lg: "none" }}
-          // display="flex"
-          justifyContent="center"
-        >
-          <Image
-            src={penImage}
-            alt="Fountain Pen"
-            // maxW={{ base: undefined, lg: "40px" }}
-            maxH={{ base: "40px", lg: "100%" }}
-            // maxW="100%"
-            position="relative"
-            mx="auto"
-          />
+        <GridItem area="pen" pt="10vh">
+          <Box transform="rotate(-0.4deg)">
+            <Image
+              src={penImage}
+              alt="Fountain Pen"
+              maxH={{ base: "40px", lg: "100%" }}
+              position="relative"
+              mx="auto"
+            />
+          </Box>
         </GridItem>
-        <GridItem area="notepad" position="relative">
+        <GridItem area="notepad" position="relative" pt="12vh">
           {/* I want box to be sticky */}
-          <Box>
+          <Box transform={"rotate(-0.3deg) translateY(3px)"}>
             <MemoNotepad
               userInput={userInput}
               mode={mode}
@@ -207,6 +168,15 @@ to {
               isLoading={isLoading}
             />
           </Box>
+        </GridItem>
+        <GridItem area="phone" pt="10vh">
+          <Flex
+            transform="rotate(0.5deg)"
+            justifyContent="center"
+            alignItems="center"
+          >
+            <QueensPhone />
+          </Flex>
         </GridItem>
         <GridItem area="article">
           <Stack>
@@ -218,29 +188,25 @@ to {
               isLoading={isLoading}
               error={result?.error}
             />
-            {generationHistory.length > 0 &&
-              !isLoading &&
-              !streamingContent && (
-                <Stack gap={6} mt={8}>
-                  {(result
-                    ? generationHistory.slice(1)
-                    : generationHistory
-                  ).map((generation) => (
-                    <ArticleStationary
-                      key={generation.id}
-                      content={generation.content}
-                      title={generation.title}
-                      showSignature={true}
-                      onDelete={() => handleDelete(generation.id)}
-                      onCopy={handleCopy}
-                    />
-                  ))}
-                </Stack>
-              )}
           </Stack>
         </GridItem>
-        <GridItem area="other">
-          <QueensPhone />
+        <GridItem area="history">
+          {generationHistory.length > 0 && !isLoading && !streamingContent && (
+            <Stack gap={6} mt={8}>
+              {(result ? generationHistory.slice(1) : generationHistory).map(
+                (generation) => (
+                  <ArticleStationary
+                    key={generation.id}
+                    content={generation.content}
+                    title={generation.title}
+                    showSignature={true}
+                    onDelete={() => handleDelete(generation.id)}
+                    onCopy={handleCopy}
+                  />
+                )
+              )}
+            </Stack>
+          )}
         </GridItem>
       </Grid>
     </Box>

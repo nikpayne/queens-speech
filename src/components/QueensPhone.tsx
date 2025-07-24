@@ -13,6 +13,12 @@ interface NotificationProps {
 }
 
 const ANIMATION_DURATION = 1000;
+const NOTIFICATION_INTERVAL = 10000;
+const MAX_VISIBLE_NOTIFICATIONS = 3;
+const NOTIFICATION_AREA_HEIGHT = "17em";
+const NOTIFICATION_AREA_BOTTOM = "5em";
+const FADE_GRADIENT_HEIGHT = "4em";
+const PHONE_HEIGHT_RATIO = 2.1;
 
 interface QueensPhoneProps {
   baseSize?: number;
@@ -29,11 +35,9 @@ const scaleHeight = keyframes`
 
 const animateContent = keyframes`
   from {
-
     opacity: 0;
   }
   to {
-
     opacity: 1;
   }
 `;
@@ -41,9 +45,7 @@ const animateContent = keyframes`
 const Notification: React.FC<NotificationProps> = ({
   title,
   message,
-  time,
   emoji,
-  id,
   isNew,
 }) => {
   return (
@@ -71,24 +73,35 @@ const Notification: React.FC<NotificationProps> = ({
       >
         <HStack gap="0.75em" align="flex-start">
           <Circle
-            size="2.5em"
-            bg="linear-gradient(135deg, #FFD700, #FFA500)"
+            size="7"
+            bg="linear-gradient(to bottom, var(--chakra-colors-gray-200), var(--chakra-colors-gray-300))"
             color="white"
-            fontSize="1.2em"
-            flexShrink={0}
+            fontSize="1em"
           >
             {emoji}
           </Circle>
           <VStack align="flex-start" gap="0.1em" flex={1} minW={0}>
             <HStack justify="space-between" w="100%">
-              <Text fontSize="0.9em" fontWeight="600" color="black">
+              <Text
+                fontSize="0.7em"
+                fontWeight="600"
+                color="black"
+                lineHeight="1.2"
+                maxLines={1}
+              >
                 {title}
               </Text>
-              <Text fontSize="0.75em" color="gray.600" flexShrink={0}>
-                {time}
+              <Text fontSize="0.6em" color="gray.600" flexShrink={0}>
+                {/* {time} */}
+                just now
               </Text>
             </HStack>
-            <Text fontSize="0.8em" color="gray.800" lineHeight="1.2">
+            <Text
+              fontSize="0.7em"
+              color="gray.800"
+              lineHeight="1.2"
+              maxLines="3"
+            >
               {message}
             </Text>
           </VStack>
@@ -98,7 +111,7 @@ const Notification: React.FC<NotificationProps> = ({
   );
 };
 
-const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16 }) => {
+const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16.5 }) => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const [visibleNotifications, setVisibleNotifications] = useState<
     NotificationProps[]
@@ -115,13 +128,15 @@ const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16 }) => {
 
   // Initialize with first 3 notifications
   useEffect(() => {
-    const initialNotifs = queenNotifications.slice(0, 3).map((notif, i) => ({
-      ...notif,
-      id: i,
-      isNew: false,
-    }));
+    const initialNotifs = queenNotifications
+      .slice(0, MAX_VISIBLE_NOTIFICATIONS)
+      .map((notif, i) => ({
+        ...notif,
+        id: i,
+        isNew: false,
+      }));
     setVisibleNotifications(initialNotifs);
-    setNotificationIndex(3);
+    setNotificationIndex(MAX_VISIBLE_NOTIFICATIONS);
   }, []);
 
   // Add new notification every 3 seconds
@@ -136,8 +151,11 @@ const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16 }) => {
       };
 
       setVisibleNotifications((prev) => {
-        // Add new notification to top, keep only 3 total
-        const updated = [newNotification, ...prev.slice(0, 2)];
+        // Add new notification to top, keep only MAX_VISIBLE_NOTIFICATIONS total
+        const updated = [
+          newNotification,
+          ...prev.slice(0, MAX_VISIBLE_NOTIFICATIONS - 1),
+        ];
         // Mark all as not new after first render
         return updated.map((notif, index) => ({
           ...notif,
@@ -153,7 +171,7 @@ const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16 }) => {
       }, ANIMATION_DURATION); // Match the 2s animation duration
 
       setNotificationIndex((prev) => prev + 1);
-    }, 3000);
+    }, NOTIFICATION_INTERVAL);
 
     return () => clearInterval(timer);
   }, [notificationIndex]);
@@ -177,7 +195,7 @@ const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16 }) => {
   return (
     <Box
       w={`${baseSize}em`}
-      h={`${baseSize * 2.1}em`}
+      h={`${baseSize * PHONE_HEIGHT_RATIO}em`}
       fontSize={`${baseSize}px`}
       position="relative"
     >
@@ -185,7 +203,9 @@ const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16 }) => {
       <Box
         w="100%"
         h="100%"
-        bg="linear-gradient(145deg, #FFD700, #FFA500, #FF8C00)"
+        // bg="linear-gradient(145deg, #FFD700, #FFA500, #FF8C00)"
+        bg="linear-gradient(to bottom, var(--chakra-colors-gray-400), var(--chakra-colors-gray-500))"
+        // bg="gray.200"
         borderRadius="2.5em"
         p="0.3em"
         boxShadow="0 1em 3em rgba(0,0,0,0.3)"
@@ -198,11 +218,12 @@ const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16 }) => {
           borderRadius="2.2em"
           position="relative"
           overflow="hidden"
+          border="0.2em solid black"
         >
           {/* Notch */}
           <Box
             position="absolute"
-            top="0.3em"
+            top="0em"
             left="50%"
             transform="translateX(-50%)"
             w="8em"
@@ -232,21 +253,21 @@ const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16 }) => {
 
           {/* Time and Date */}
           <VStack gap="0.2em" color="white" textAlign="center" mt="2em">
-            <Text fontSize="4em" fontWeight="200" lineHeight="0.9">
-              {formatTime(currentTime)}
-            </Text>
             <Text fontSize="1.1em" fontWeight="400" opacity={0.9}>
               {formatDate(currentTime)}
+            </Text>
+            <Text fontSize="4em" fontWeight="200" lineHeight="0.9">
+              {formatTime(currentTime)}
             </Text>
           </VStack>
 
           {/* Notifications Area */}
           <Box
             position="absolute"
-            bottom="6em"
+            bottom={NOTIFICATION_AREA_BOTTOM}
             left="1em"
             right="1em"
-            height="12em"
+            height={NOTIFICATION_AREA_HEIGHT}
             overflow="hidden"
             _after={{
               content: '""',
@@ -254,9 +275,9 @@ const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16 }) => {
               bottom: 0,
               left: 0,
               right: 0,
-              height: "4em",
+              height: FADE_GRADIENT_HEIGHT,
               background:
-                "linear-gradient(0deg, #FF6B9D 0%, rgba(0,0,0,0) 100%)",
+                "linear-gradient(0deg, transparent 0%, rgba(0,0,0,0) 100%)",
               zIndex: 5,
               pointerEvents: "none",
             }}
@@ -286,7 +307,7 @@ const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16 }) => {
             gap="2em"
           >
             <Circle
-              size="3em"
+              size="2em"
               bg="rgba(255,255,255,0.3)"
               color="white"
               fontSize="1.2em"
@@ -294,7 +315,7 @@ const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16 }) => {
               🔦
             </Circle>
             <Circle
-              size="3em"
+              size="2em"
               bg="rgba(255,255,255,0.3)"
               color="white"
               fontSize="1.2em"
