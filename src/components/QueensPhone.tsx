@@ -12,30 +12,22 @@ interface NotificationProps {
   isNew?: boolean;
 }
 
+const ANIMATION_DURATION = 2000;
+
 interface QueensPhoneProps {
   baseSize?: number;
 }
 
-// const slideInFromTop = keyframes`
-//   from {
-//     transform: translateY(-120%);
-//     opacity: 0;
-//   }
-//   to {
-//     transform: translateY(0);
-//     opacity: 1;
-//   }
-// `;
 const slideInFromTop = keyframes`
   from {
     transform: scale(0);
-    maxHeight: 0px;
     opacity: 0;
+    maxHeight: 0;
   }
   to {
     transform: scale(1);
-    maxHeight: 1000px;
     opacity: 1;
+    maxHeight: 500px;
   }
 `;
 
@@ -58,7 +50,10 @@ const Notification: React.FC<NotificationProps> = ({
       overflow="hidden"
       position="relative"
       flexShrink={0}
-      animation={isNew ? `${slideInFromTop} 2s ease-out ` : undefined}
+      transformOrigin="top"
+      animation={
+        isNew ? `${slideInFromTop} ${ANIMATION_DURATION}ms ease-out` : undefined
+      }
     >
       <HStack gap="0.75em" align="flex-start">
         <Circle
@@ -140,7 +135,7 @@ const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16 }) => {
         setVisibleNotifications((prev) =>
           prev.map((notif) => ({ ...notif, isNew: false }))
         );
-      }, 600);
+      }, ANIMATION_DURATION); // Match the 2s animation duration
 
       setNotificationIndex((prev) => prev + 1);
     }, 3000);
