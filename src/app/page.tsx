@@ -117,7 +117,7 @@ to {
   //   <Stack bg="red">
   //     <Box
   //       height="auto"
-  //       animation={`${scaleHeight} ${4000}ms ease-out infinite alternate`}
+  //       animation={`${scaleHeight} ${4000}ms ease-out forwards`}
   //       animationTimingFunction="ease-out"
   //       bg="blue"
   //       overflow="hidden"

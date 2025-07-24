@@ -23,17 +23,17 @@ const scaleHeight = keyframes`
     max-height: 0px;
   }
   to {
-    max-height: 1000px;
+    max-height: 300px;
   }
 `;
 
-const scaleContent = keyframes`
+const animateContent = keyframes`
   from {
-    transform: scale(0);
+
     opacity: 0;
   }
   to {
-    transform: scale(1);
+
     opacity: 1;
   }
 `;
@@ -50,11 +50,11 @@ const Notification: React.FC<NotificationProps> = ({
     <Box
       animation={
         isNew
-          ? `${scaleHeight} ${ANIMATION_DURATION / 4}ms ease-out forwards`
+          ? `${scaleHeight} ${ANIMATION_DURATION}ms ease-out forwards`
           : undefined
       }
       height="auto"
-      overflowY="hidden !important"
+      overflow="hidden"
     >
       <Box
         bg="rgba(255, 255, 255, 0.25)"
@@ -63,10 +63,11 @@ const Notification: React.FC<NotificationProps> = ({
         p="0.75em"
         mb="0.5em"
         fontSize="1em"
-        // transformOrigin="center"
-        // animation={
-        //   isNew ? `${scaleContent} ${ANIMATION_DURATION}ms ease-out` : undefined
-        // }
+        animation={
+          isNew
+            ? `${animateContent} ${ANIMATION_DURATION}ms ease-out`
+            : undefined
+        }
       >
         <HStack gap="0.75em" align="flex-start">
           <Circle
