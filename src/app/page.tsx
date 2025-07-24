@@ -138,12 +138,12 @@ export default function Home() {
                 setResult(finalResult);
 
                 // Save to localStorage
-                if (accumulatedTitle && accumulatedContent) {
+                if (finalResult.article) {
                   saveGeneration({
                     prompt: userInput,
                     mode: mode,
-                    title: accumulatedTitle,
-                    content: accumulatedContent,
+                    title: finalResult.title,
+                    content: finalResult.article,
                     usedReferences: usedReferences,
                   });
                   // Update local state with new history
@@ -177,13 +177,12 @@ export default function Home() {
     }
   };
 
-  const articleContent =
-    result && result.success ? result.article || "" : streamingContent || "";
-  const articleTitle =
-    result && result.success ? result.title || "" : streamingTitle || "";
-  const showSignature = Boolean(
-    result && result.success && !isLoading && !streamingContent
-  );
+  const success = result && result.success;
+  const articleContent = success
+    ? result.article || ""
+    : streamingContent || "";
+  const articleTitle = success ? result.title || "" : streamingTitle || "";
+  const showSignature = Boolean(success && !isLoading && !streamingContent);
 
   const penImage = useBreakpointValue({
     base: "/fountain-pen-rotated.png",
