@@ -117,6 +117,24 @@ const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16.5 }) => {
     NotificationProps[]
   >([]);
   const [notificationIndex, setNotificationIndex] = useState(0);
+  const [shuffledNotifications, setShuffledNotifications] = useState<
+    typeof queenNotifications
+  >([]);
+
+  // Shuffle function using Fisher-Yates algorithm
+  const shuffleArray = <T,>(array: T[]): T[] => {
+    const shuffled = [...array];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    return shuffled;
+  };
+
+  // Shuffle notifications on mount
+  useEffect(() => {
+    setShuffledNotifications(shuffleArray(queenNotifications));
+  }, []);
 
   // Update time every second
   useEffect(() => {
@@ -128,7 +146,9 @@ const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16.5 }) => {
 
   // Initialize with first 3 notifications
   useEffect(() => {
-    const initialNotifs = queenNotifications
+    if (shuffledNotifications.length === 0) return; // Wait for shuffle to complete
+
+    const initialNotifs = shuffledNotifications
       .slice(0, MAX_VISIBLE_NOTIFICATIONS)
       .map((notif, i) => ({
         ...notif,
@@ -137,15 +157,17 @@ const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16.5 }) => {
       }));
     setVisibleNotifications(initialNotifs);
     setNotificationIndex(MAX_VISIBLE_NOTIFICATIONS);
-  }, []);
+  }, [shuffledNotifications]);
 
   // Add new notification every 3 seconds
   useEffect(() => {
-    if (notificationIndex === 0) return; // Wait for initialization
+    if (notificationIndex === 0 || shuffledNotifications.length === 0) return; // Wait for initialization and shuffle
 
     const timer = setInterval(() => {
       const newNotification = {
-        ...queenNotifications[notificationIndex % queenNotifications.length],
+        ...shuffledNotifications[
+          notificationIndex % shuffledNotifications.length
+        ],
         id: Date.now(), // Unique ID
         isNew: true,
       };
@@ -174,7 +196,7 @@ const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16.5 }) => {
     }, NOTIFICATION_INTERVAL);
 
     return () => clearInterval(timer);
-  }, [notificationIndex]);
+  }, [notificationIndex, shuffledNotifications]);
 
   const formatTime = (date: Date) => {
     return date.toLocaleTimeString([], {
