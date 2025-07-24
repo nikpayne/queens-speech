@@ -26,6 +26,8 @@ import {
 import type { GenerationMode } from "@/lib/generator";
 import { useGeneration } from "@/hooks/useGeneration";
 
+import QueensPhone from "@/components/QueensPhone";
+
 export default function Home() {
   const [userInput, setUserInput] = useState("");
   const [mode, setMode] = useState<GenerationMode>("write");
@@ -121,7 +123,7 @@ export default function Home() {
           "other"
         `,
           lg: `
-          "pen notepad article other ."
+          "pen notepad article other other"
         `,
         }}
         gridTemplateColumns={{
@@ -194,7 +196,9 @@ export default function Home() {
               )}
           </Stack>
         </GridItem>
-        <GridItem area="other"></GridItem>
+        <GridItem area="other">
+          <QueensPhone />
+        </GridItem>
       </Grid>
     </Box>
   );
