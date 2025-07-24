@@ -9,58 +9,8 @@ import {
   useBreakpointValue,
   Text,
 } from "@chakra-ui/react";
-import { keyframes } from "@emotion/react";
-import { useMemo, useState } from "react";
-import { LOADING_PHRASES } from "./constants";
+import React from "react";
 import type { GenerationMode } from "@/lib/generator";
-
-interface AnimatedLoadingTextProps {
-  text: string;
-}
-
-function AnimatedLoadingText({ text }: AnimatedLoadingTextProps) {
-  const slideIn = keyframes`
-    from {
-      opacity: 0;
-      transform: translateX(10px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  `;
-  const TOTAL_DURATION = 2; // seconds
-  const numchars = text.length;
-  const durationPerChar = TOTAL_DURATION / numchars;
-
-  return (
-    <Text
-      fontSize="sm"
-      color="gray.700"
-      fontWeight="bold"
-      textAlign="center"
-      fontFamily="'Cormorant SC', 'Playfair Display', serif"
-      letterSpacing="0.05em"
-    >
-      {text.split("").map((char, index) => (
-        <Box
-          key={index}
-          as="span"
-          display="inline-block"
-          opacity={0}
-          transform="translateX(1em)"
-          css={{
-            animation: `${slideIn} ${durationPerChar}s ease-out ${
-              index * durationPerChar
-            }s both`,
-          }}
-        >
-          {char === " " ? "\u00A0" : char}
-        </Box>
-      ))}
-    </Text>
-  );
-}
 
 interface MemoNotepadProps {
   userInput: string;
@@ -79,12 +29,6 @@ export default function MemoNotepad({
   onGenerate,
   isLoading,
 }: MemoNotepadProps) {
-  // Pick a random loading message when component starts loading
-  const loadingMessage = useMemo(() => {
-    const randomIndex = Math.floor(Math.random() * LOADING_PHRASES.length);
-    return LOADING_PHRASES[randomIndex];
-  }, []); // Re-pick when loading state changes
-
   const isMobile = useBreakpointValue({ base: true, lg: false });
 
   return (
@@ -212,8 +156,6 @@ export default function MemoNotepad({
           >
             Give to the Queen
           </Button>
-
-          {isLoading && <AnimatedLoadingText text={loadingMessage} />}
         </Box>
       </Stack>
     </Stack>

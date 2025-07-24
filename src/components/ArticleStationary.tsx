@@ -9,16 +9,63 @@ import {
   ButtonGroup,
 } from "@chakra-ui/react";
 import { MdContentCopy, MdDelete } from "react-icons/md";
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { keyframes } from "@emotion/react";
+import { LOADING_PHRASES } from "./constants";
 
 interface ArticleStationaryProps {
   content: string;
   title?: string;
   showSignature?: boolean;
   showPaperHolders?: boolean;
+  isLoading?: boolean;
   error?: string;
   onDelete?: () => void;
   onCopy?: () => void;
+}
+
+interface AnimatedLoadingTextProps {
+  text: string;
+}
+
+function AnimatedLoadingText({ text }: AnimatedLoadingTextProps) {
+  const fadeIn = keyframes`
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  `;
+  const TOTAL_DURATION = 0.5; // seconds
+  const numchars = text.length;
+  const durationPerChar = TOTAL_DURATION / numchars;
+
+  return (
+    <Text
+      fontFamily="monospace"
+      fontSize="sm"
+      lineHeight="1.8"
+      whiteSpace="pre-wrap"
+      color="gray.600"
+    >
+      {text.split("").map((char, index) => (
+        <Box
+          key={index}
+          as="span"
+          display="inline-block"
+          opacity={0}
+          css={{
+            animation: `${fadeIn} ${durationPerChar}s ease-out ${
+              index * durationPerChar
+            }s both`,
+          }}
+        >
+          {char === " " ? "\u00A0" : char}
+        </Box>
+      ))}
+    </Text>
+  );
 }
 
 export default function ArticleStationary({
@@ -26,11 +73,18 @@ export default function ArticleStationary({
   title = "",
   showSignature = false,
   showPaperHolders = false,
+  isLoading = false,
   error = "",
   onDelete,
   onCopy,
 }: ArticleStationaryProps) {
   const [isHovered, setIsHovered] = useState(false);
+
+  // Pick a random loading message when loading starts
+  const loadingMessage = useMemo(() => {
+    const randomIndex = Math.floor(Math.random() * LOADING_PHRASES.length);
+    return LOADING_PHRASES[randomIndex];
+  }, [isLoading]); // Re-pick when loading state changes
 
   const textStyling = {
     fontFamily: "monospace",
@@ -133,11 +187,17 @@ export default function ArticleStationary({
 
         {/* Article content */}
         <Box>
-          <Text {...textStyling}>{content}</Text>
-          {error && (
-            <Text {...textStyling} color="red.500">
-              {error}
-            </Text>
+          {isLoading && !content ? (
+            <AnimatedLoadingText text={loadingMessage} />
+          ) : (
+            <>
+              <Text {...textStyling}>{content}</Text>
+              {error && (
+                <Text {...textStyling} color="red.500">
+                  {error}
+                </Text>
+              )}
+            </>
           )}
         </Box>
       </Stack>

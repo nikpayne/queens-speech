@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateQueenElizabethClickhole, type GenerationMode } from '@/lib/generator';
-import { getAllReferences, pickRelevantReferences } from '@/lib/referencePicker';
+import { getAllReferences, pickRandomReferences } from '@/lib/referencePicker';
 
 export async function POST(request: NextRequest) {
   try {
@@ -46,8 +46,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Pick relevant references based on user input
-    const relevantReferences = pickRelevantReferences(userInput, allReferences, 2);
+    // Pick random references for variety
+    const relevantReferences = pickRandomReferences(allReferences, 2);
 
     // Create a readable stream for the response
     const encoder = new TextEncoder();

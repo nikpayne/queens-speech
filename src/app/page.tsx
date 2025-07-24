@@ -170,6 +170,7 @@ export default function Home() {
               title={articleTitle}
               showSignature={showSignature}
               showPaperHolders={true}
+              isLoading={isLoading}
               error={result?.error}
             />
             {generationHistory.length > 0 &&

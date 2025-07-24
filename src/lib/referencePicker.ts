@@ -80,6 +80,23 @@ export function pickRelevantReferences(
     .map(item => item.ref);
 }
 
+export function pickRandomReferences(
+  references: ReferenceArticle[], 
+  maxReferences: number = 2
+): ReferenceArticle[] {
+  // Create a copy of the references array to avoid mutating the original
+  const shuffled = [...references];
+  
+  // Fisher-Yates shuffle algorithm
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  
+  // Return the first maxReferences items
+  return shuffled.slice(0, Math.min(maxReferences, shuffled.length));
+}
+
 export function formatReferencesForPrompt(references: ReferenceArticle[]): string {
   return references.map((ref, index) => {
     return `REFERENCE EXAMPLE ${index + 1}:
