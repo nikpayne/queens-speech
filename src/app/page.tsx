@@ -15,6 +15,7 @@ import {
   Button,
   IconButton,
 } from "@chakra-ui/react";
+import { keyframes } from "@emotion/react";
 import DesktopWindow from "@/components/DesktopWindow";
 import MemoNotepad from "@/components/MemoNotepad";
 import ArticleStationary from "@/components/ArticleStationary";
@@ -88,6 +89,48 @@ export default function Home() {
     base: "/fountain-pen-rotated.png",
     lg: "/fountain-pen.png",
   });
+
+  //   const scaleHeight = keyframes`
+  //   from {
+  //     grid-template-rows: 0fr;
+  //     max-height: 0;
+  //     overflow: hidden;
+  //     opacity: 0;
+  //   }
+  //   to {
+  //     grid-template-rows: 1fr;
+  //     max-height: 5000px;
+  //     overflow: hidden;
+  //     opacity: 1;
+  //   }
+  // `;
+  const scaleHeight = keyframes`
+from {
+  max-height: 0px
+}
+to { 
+  max-height: 1000px;
+}
+`;
+
+  // return (
+  //   <Stack bg="red">
+  //     <Box
+  //       height="auto"
+  //       animation={`${scaleHeight} ${4000}ms ease-out infinite alternate`}
+  //       animationTimingFunction="ease-out"
+  //       bg="blue"
+  //       overflow="hidden"
+  //     >
+  //       <Box p="4">
+  //         <Text>Hello</Text>
+  //       </Box>
+  //     </Box>
+  //     <Box p="4">
+  //       <Text>Hello</Text>
+  //     </Box>
+  //   </Stack>
+  // );
 
   return (
     <Box

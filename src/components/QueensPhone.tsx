@@ -12,22 +12,29 @@ interface NotificationProps {
   isNew?: boolean;
 }
 
-const ANIMATION_DURATION = 2000;
+const ANIMATION_DURATION = 1000;
 
 interface QueensPhoneProps {
   baseSize?: number;
 }
 
-const slideInFromTop = keyframes`
+const scaleHeight = keyframes`
+  from {
+    max-height: 0px;
+  }
+  to {
+    max-height: 1000px;
+  }
+`;
+
+const scaleContent = keyframes`
   from {
     transform: scale(0);
     opacity: 0;
-    maxHeight: 0;
   }
   to {
     transform: scale(1);
     opacity: 1;
-    maxHeight: 500px;
   }
 `;
 
@@ -41,44 +48,51 @@ const Notification: React.FC<NotificationProps> = ({
 }) => {
   return (
     <Box
-      bg="rgba(255, 255, 255, 0.85)"
-      backdropFilter="blur(10px)"
-      borderRadius="1em"
-      p="0.75em"
-      mb="0.5em"
-      fontSize="1em"
-      overflow="hidden"
-      position="relative"
-      flexShrink={0}
-      transformOrigin="top"
       animation={
-        isNew ? `${slideInFromTop} ${ANIMATION_DURATION}ms ease-out` : undefined
+        isNew
+          ? `${scaleHeight} ${ANIMATION_DURATION / 4}ms ease-out forwards`
+          : undefined
       }
+      height="auto"
+      overflowY="hidden !important"
     >
-      <HStack gap="0.75em" align="flex-start">
-        <Circle
-          size="2.5em"
-          bg="linear-gradient(135deg, #FFD700, #FFA500)"
-          color="white"
-          fontSize="1.2em"
-          flexShrink={0}
-        >
-          {emoji}
-        </Circle>
-        <VStack align="flex-start" gap="0.1em" flex={1} minW={0}>
-          <HStack justify="space-between" w="100%">
-            <Text fontSize="0.9em" fontWeight="600" color="black">
-              {title}
+      <Box
+        bg="rgba(255, 255, 255, 0.25)"
+        backdropFilter="blur(10px)"
+        borderRadius="1em"
+        p="0.75em"
+        mb="0.5em"
+        fontSize="1em"
+        // transformOrigin="center"
+        // animation={
+        //   isNew ? `${scaleContent} ${ANIMATION_DURATION}ms ease-out` : undefined
+        // }
+      >
+        <HStack gap="0.75em" align="flex-start">
+          <Circle
+            size="2.5em"
+            bg="linear-gradient(135deg, #FFD700, #FFA500)"
+            color="white"
+            fontSize="1.2em"
+            flexShrink={0}
+          >
+            {emoji}
+          </Circle>
+          <VStack align="flex-start" gap="0.1em" flex={1} minW={0}>
+            <HStack justify="space-between" w="100%">
+              <Text fontSize="0.9em" fontWeight="600" color="black">
+                {title}
+              </Text>
+              <Text fontSize="0.75em" color="gray.600" flexShrink={0}>
+                {time}
+              </Text>
+            </HStack>
+            <Text fontSize="0.8em" color="gray.800" lineHeight="1.2">
+              {message}
             </Text>
-            <Text fontSize="0.75em" color="gray.600" flexShrink={0}>
-              {time}
-            </Text>
-          </HStack>
-          <Text fontSize="0.8em" color="gray.800" lineHeight="1.2">
-            {message}
-          </Text>
-        </VStack>
-      </HStack>
+          </VStack>
+        </HStack>
+      </Box>
     </Box>
   );
 };
@@ -247,7 +261,7 @@ const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16 }) => {
             }}
           >
             {/* Simple Notification List */}
-            <VStack gap="0" align="stretch">
+            <Box>
               {visibleNotifications.map((notification) => (
                 <Notification
                   key={notification.id}
@@ -259,7 +273,7 @@ const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16 }) => {
                   isNew={notification.isNew}
                 />
               ))}
-            </VStack>
+            </Box>
           </Box>
 
           {/* Bottom Indicators */}
