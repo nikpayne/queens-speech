@@ -8,6 +8,7 @@ interface NotificationProps {
   message: string;
   time: string;
   emoji: string;
+  id: number;
   isNew?: boolean;
 }
 
@@ -15,16 +16,26 @@ interface QueensPhoneProps {
   baseSize?: number;
 }
 
-const expandNotification = keyframes`
+// const slideInFromTop = keyframes`
+//   from {
+//     transform: translateY(-120%);
+//     opacity: 0;
+//   }
+//   to {
+//     transform: translateY(0);
+//     opacity: 1;
+//   }
+// `;
+const slideInFromTop = keyframes`
   from {
-    transform: scale(0),
-    opacity: 0,
-    height: auto
+    transform: scale(0);
+    maxHeight: 0px;
+    opacity: 0;
   }
   to {
-    transform: scale(1),
-    opacity: 1,
-    height: auto
+    transform: scale(1);
+    maxHeight: 1000px;
+    opacity: 1;
   }
 `;
 
@@ -33,6 +44,7 @@ const Notification: React.FC<NotificationProps> = ({
   message,
   time,
   emoji,
+  id,
   isNew,
 }) => {
   return (
@@ -40,15 +52,15 @@ const Notification: React.FC<NotificationProps> = ({
       bg="rgba(255, 255, 255, 0.85)"
       backdropFilter="blur(10px)"
       borderRadius="1em"
-      p={isNew ? "0" : "0.75em"}
-      mb={isNew ? "0" : "0.5em"}
+      p="0.75em"
+      mb="0.5em"
       fontSize="1em"
       overflow="hidden"
-      animation={
-        isNew ? `${expandNotification} 0.8s ease-out forwards` : undefined
-      }
+      position="relative"
+      flexShrink={0}
+      animation={isNew ? `${slideInFromTop} 2s ease-out ` : undefined}
     >
-      <HStack gap="0.75em" align="flex-start" p={isNew ? "0.75em" : "0"}>
+      <HStack gap="0.75em" align="flex-start">
         <Circle
           size="2.5em"
           bg="linear-gradient(135deg, #FFD700, #FFA500)"
@@ -93,30 +105,45 @@ const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16 }) => {
 
   // Initialize with first 3 notifications
   useEffect(() => {
-    setVisibleNotifications(queenNotifications.slice(0, 3));
+    const initialNotifs = queenNotifications.slice(0, 3).map((notif, i) => ({
+      ...notif,
+      id: i,
+      isNew: false,
+    }));
+    setVisibleNotifications(initialNotifs);
     setNotificationIndex(3);
   }, []);
 
-  // Add new notification every 30 seconds
+  // Add new notification every 3 seconds
   useEffect(() => {
-    if (notificationIndex >= queenNotifications.length) return;
+    if (notificationIndex === 0) return; // Wait for initialization
 
     const timer = setInterval(() => {
       const newNotification = {
         ...queenNotifications[notificationIndex % queenNotifications.length],
+        id: Date.now(), // Unique ID
         isNew: true,
       };
 
       setVisibleNotifications((prev) => {
+        // Add new notification to top, keep only 3 total
         const updated = [newNotification, ...prev.slice(0, 2)];
+        // Mark all as not new after first render
         return updated.map((notif, index) => ({
           ...notif,
-          isNew: index === 0,
+          isNew: index === 0 && notif.isNew,
         }));
       });
 
+      // Clear the isNew flag after animation
+      setTimeout(() => {
+        setVisibleNotifications((prev) =>
+          prev.map((notif) => ({ ...notif, isNew: false }))
+        );
+      }, 600);
+
       setNotificationIndex((prev) => prev + 1);
-    }, 1000); // 30 seconds
+    }, 3000);
 
     return () => clearInterval(timer);
   }, [notificationIndex]);
@@ -209,19 +236,35 @@ const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16 }) => {
             bottom="6em"
             left="1em"
             right="1em"
-            maxH="12em"
-            overflowY="hidden"
+            height="12em"
+            overflow="hidden"
+            _after={{
+              content: '""',
+              position: "absolute",
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: "4em",
+              background:
+                "linear-gradient(0deg, #FF6B9D 0%, rgba(0,0,0,0) 100%)",
+              zIndex: 5,
+              pointerEvents: "none",
+            }}
           >
-            {visibleNotifications.map((notification, index) => (
-              <Notification
-                key={`${notification.title}-${index}`}
-                title={notification.title}
-                message={notification.message}
-                time={notification.time}
-                emoji={notification.emoji}
-                isNew={notification.isNew}
-              />
-            ))}
+            {/* Simple Notification List */}
+            <VStack gap="0" align="stretch">
+              {visibleNotifications.map((notification) => (
+                <Notification
+                  key={notification.id}
+                  title={notification.title}
+                  message={notification.message}
+                  time={notification.time}
+                  emoji={notification.emoji}
+                  id={notification.id}
+                  isNew={notification.isNew}
+                />
+              ))}
+            </VStack>
           </Box>
 
           {/* Bottom Indicators */}
