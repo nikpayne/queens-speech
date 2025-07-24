@@ -11,6 +11,9 @@ import {
   Flex,
   Grid,
   GridItem,
+  useBreakpointValue,
+  Button,
+  IconButton,
 } from "@chakra-ui/react";
 import DesktopWindow from "@/components/DesktopWindow";
 import MemoNotepad from "@/components/MemoNotepad";
@@ -44,8 +47,6 @@ export default function Home() {
   const [generationHistory, setGenerationHistory] = useState<
     GenerationHistory[]
   >([]);
-  // For now, we'll use a simple feedback system without toast
-  // const toast = useToast();
 
   useEffect(() => {
     // Load generation history on component mount
@@ -184,15 +185,48 @@ export default function Home() {
     result && result.success && !isLoading && !streamingContent
   );
 
+  const penImage = useBreakpointValue({
+    base: "/fountain-pen-rotated.png",
+    lg: "/fountain-pen.png",
+  });
+
+  const handleLogLocalStorage = () => {
+    const history = getGenerationHistory();
+    console.log("=== LOCALSTORAGE DEBUG ===");
+    console.log("Total generations:", history.length);
+    console.log("Generation history:", history);
+    console.log(
+      "Raw localStorage data:",
+      localStorage.getItem("queens-speech-history")
+    );
+    console.log("========================");
+  };
+
   return (
     <Box
       minH="100vh"
-      // bgImage="url('https://media1.thehungryjpeg.com/thumbs2/ori_112089_038b9609023e963d7cc9d48242cb5541e9d03ff5_20-dark-wood-background-textures.jpg')"
-      // bgAttachment="fixed"
-      bg="rgb(47, 13, 2)"
+      bgImage="url('https://media1.thehungryjpeg.com/thumbs2/ori_112089_038b9609023e963d7cc9d48242cb5541e9d03ff5_20-dark-wood-background-textures.jpg')"
+      bgAttachment="fixed"
       bgSize="cover"
       bgRepeat="no-repeat"
+      position="relative"
     >
+      {/* Debug button - top right corner */}
+      <Button
+        position="fixed"
+        top="4"
+        right="4"
+        size="sm"
+        colorScheme="gray"
+        variant="solid"
+        onClick={handleLogLocalStorage}
+        zIndex="1000"
+        bg="blackAlpha.700"
+        color="white"
+        _hover={{ bg: "blackAlpha.800" }}
+      >
+        Debug Storage
+      </Button>
       <Grid
         gridTemplateAreas={{
           base: `
@@ -213,15 +247,22 @@ export default function Home() {
         mx="auto"
         py="8"
         gap="6"
-        px="6"
+        px="4"
       >
-        <GridItem area="pen" maxH={{ base: "40px", lg: "auto" }}>
+        <GridItem
+          area="pen"
+          // maxH={{ base: "40px", lg: "none" }}
+          // display="flex"
+          justifyContent="center"
+        >
           <Image
-            src="/fountain-pen.png"
-            w={"40px"}
+            src={penImage}
+            alt="Fountain Pen"
+            // maxW={{ base: undefined, lg: "40px" }}
+            maxH={{ base: "40px", lg: "100%" }}
+            // maxW="100%"
             position="relative"
-            top="16px"
-            transform={{ base: "rotate(90deg)", lg: "rotate(-1deg)" }}
+            mx="auto"
           />
         </GridItem>
         <GridItem area="notepad" position="relative">
