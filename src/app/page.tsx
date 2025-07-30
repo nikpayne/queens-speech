@@ -4,19 +4,13 @@ import { useState, useEffect } from "react";
 import {
   Box,
   Image,
-  Container,
   Stack,
-  Text,
-  HStack,
   Flex,
   Grid,
   GridItem,
   useBreakpointValue,
   Button,
-  IconButton,
 } from "@chakra-ui/react";
-import { keyframes } from "@emotion/react";
-import DesktopWindow from "@/components/DesktopWindow";
 import MemoNotepad from "@/components/MemoNotepad";
 import ArticleStationary from "@/components/ArticleStationary";
 import {
@@ -90,12 +84,6 @@ export default function Home() {
     lg: "/fountain-pen.png",
   });
 
-  const centerStyling = {
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  };
-
   return (
     <Box
       minH="100vh"
@@ -153,6 +141,7 @@ export default function Home() {
               maxH={{ base: "40px", lg: "100%" }}
               position="relative"
               mx="auto"
+              filter="brightness(0.9) drop-shadow(0 0 10px rgba(0, 0, 0, 0.4))"
             />
           </Box>
         </GridItem>
@@ -211,7 +200,6 @@ export default function Home() {
                     title={generation.title}
                     showSignature={true}
                     onDelete={() => handleDelete(generation.id)}
-                    onCopy={handleCopy}
                   />
                 )
               )}

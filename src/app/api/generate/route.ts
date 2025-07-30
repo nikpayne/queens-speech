@@ -14,9 +14,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (mode && !['write', 'refine'].includes(mode)) {
-      return NextResponse.json(
-        { error: 'Mode must be either "write" or "refine"' },
+      if (mode && !['write', 'rewrite'].includes(mode)) {
+    return NextResponse.json(
+      { error: 'Mode must be either "write" or "rewrite"' },
         { status: 400 }
       );
     }

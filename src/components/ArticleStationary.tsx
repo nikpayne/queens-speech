@@ -8,6 +8,8 @@ import {
   IconButton,
   ButtonGroup,
 } from "@chakra-ui/react";
+import { Toaster, toaster } from "@/components/ui/toaster";
+import { Tooltip } from "@/components/ui/tooltip";
 import { MdContentCopy, MdDelete } from "react-icons/md";
 import { useState, useMemo } from "react";
 import { keyframes } from "@emotion/react";
@@ -21,7 +23,6 @@ interface ArticleStationaryProps {
   isLoading?: boolean;
   error?: string;
   onDelete?: () => void;
-  onCopy?: () => void;
 }
 
 interface AnimatedLoadingTextProps {
@@ -76,7 +77,6 @@ export default function ArticleStationary({
   isLoading = false,
   error = "",
   onDelete,
-  onCopy,
 }: ArticleStationaryProps) {
   const [isHovered, setIsHovered] = useState(false);
 
@@ -95,11 +95,14 @@ export default function ArticleStationary({
   };
 
   const handleCopy = () => {
-    if (onCopy && content) {
+    if (content) {
       navigator.clipboard
         .writeText(content)
         .then(() => {
-          onCopy();
+          toaster.create({
+            title: "Article copied to clipboard!",
+            type: "success",
+          });
         })
         .catch((err) => {
           console.error("Failed to copy content: ", err);
@@ -107,129 +110,134 @@ export default function ArticleStationary({
     }
   };
 
-  const showButtons = showSignature && (onDelete || onCopy);
+  const showButtons = showSignature && (onDelete || content);
 
   return (
-    <Stack
-      bg="#FCFCF1"
-      p={8}
-      borderRadius="sm"
-      border="1px solid hsl(60, 30.70%, 92%)"
-      boxShadow="md"
-      maxW="full"
-      fontFamily="monospace"
-      minH="900px"
-      justifyContent="space-between"
-      gap={6}
-      // filter={!content ? "blur(1.5px)" : "none"}
-      // transition="filter 0.3s ease-in-out"
-      position="relative"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
-      {/* Paper holders at corners */}
-      {showPaperHolders && <PaperHolders />}
-
-      {/* Copy and Delete buttons - only shown on hover and for finished generations */}
-      {showButtons && (
-        <ButtonGroup
-          size="sm"
-          variant="ghost"
-          position="absolute"
-          top={4}
-          right={4}
-          opacity={isHovered ? 1 : 0}
-          transition="opacity 0.2s ease-in-out"
-          bg="white"
-          boxShadow="sm"
-          borderRadius="md"
-          p={1}
-        >
-          {onCopy && (
-            <IconButton
-              aria-label="Copy article"
-              onClick={handleCopy}
-              _hover={{ bg: "gray.100" }}
-            >
-              <MdContentCopy />
-            </IconButton>
-          )}
-          {onDelete && (
-            <IconButton
-              aria-label="Delete article"
-              onClick={onDelete}
-              _hover={{ bg: "red.100", color: "red.600" }}
-            >
-              <MdDelete />
-            </IconButton>
-          )}
-        </ButtonGroup>
-      )}
-
-      <Stack direction="column" gap={6}>
-        {/* Header section for Buckingham Palace logo */}
-        <Box textAlign="center" py={4}>
-          <Box
-            h="120px"
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-          >
-            <Image
-              src="/buckingham-palace.svg"
-              alt="Buckingham Palace"
-              h="100px"
-              w="auto"
-              objectFit="contain"
-            />
-          </Box>
-        </Box>
-
-        {/* Article content */}
-        <Box>
-          {isLoading && !content ? (
-            <AnimatedLoadingText text={loadingMessage} />
-          ) : (
-            <>
-              <Text {...textStyling}>{content}</Text>
-              {error && (
-                <Text {...textStyling} color="red.500">
-                  {error}
-                </Text>
-              )}
-            </>
-          )}
-        </Box>
-      </Stack>
-
-      <HStack
-        gap="6"
-        // alignItems="flex-start"
-
-        alignItems="stretch"
+    <>
+      <Toaster />
+      <Stack
+        bg="#FCFCF1"
+        p={8}
+        borderRadius="sm"
+        border="1px solid hsl(60, 30.70%, 92%)"
+        boxShadow="md"
+        maxW="full"
+        fontFamily="monospace"
+        minH="900px"
+        justifyContent="space-between"
+        gap={6}
+        // filter={!content ? "blur(1.5px)" : "none"}
+        // transition="filter 0.3s ease-in-out"
+        position="relative"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
       >
-        <Flex>
-          {/* Please put the title here */}
-          <Text
-            color="gray.400"
-            fontSize="sm"
-            fontFamily="'Homemade Apple', 'Beth Ellen', 'La Belle Aurore', serif"
-            transform="rotate(-0.1deg)"
-            py={2}
+        {/* Paper holders at corners */}
+        {showPaperHolders && <PaperHolders />}
+
+        {/* Copy and Delete buttons - only shown on hover and for finished generations */}
+        {showButtons && (
+          <ButtonGroup
+            size="sm"
+            variant="ghost"
+            position="absolute"
+            top={4}
+            right={4}
+            opacity={isHovered ? 1 : 0}
+            transition="opacity 0.2s ease-in-out"
+            bg="white"
+            boxShadow="sm"
+            borderRadius="md"
+            p={1}
           >
-            {title.toLowerCase()}
-          </Text>
-        </Flex>
-        <Image
-          opacity={showSignature ? 1 : 0}
-          transition="opacity 0.6s ease-in-out 0.5s"
-          src="/elizabeth-signature.svg"
-          maxH="16"
-          objectFit="contain"
-          alt="Queen elizabeth signature"
-        />
-      </HStack>
-    </Stack>
+            <Tooltip content="Copy article">
+              <IconButton
+                aria-label="Copy article"
+                onClick={handleCopy}
+                _hover={{ bg: "gray.100" }}
+              >
+                <MdContentCopy />
+              </IconButton>
+            </Tooltip>
+            {onDelete && (
+              <Tooltip content="Delete article">
+                <IconButton
+                  aria-label="Delete article"
+                  onClick={onDelete}
+                  _hover={{ bg: "red.100", color: "red.600" }}
+                >
+                  <MdDelete />
+                </IconButton>
+              </Tooltip>
+            )}
+          </ButtonGroup>
+        )}
+
+        <Stack direction="column" gap={6}>
+          {/* Header section for Buckingham Palace logo */}
+          <Box textAlign="center" py={4}>
+            <Box
+              h="120px"
+              display="flex"
+              alignItems="center"
+              justifyContent="center"
+            >
+              <Image
+                src="/buckingham-palace.svg"
+                alt="Buckingham Palace"
+                h="100px"
+                w="auto"
+                objectFit="contain"
+              />
+            </Box>
+          </Box>
+
+          {/* Article content */}
+          <Box>
+            {isLoading && !content ? (
+              <AnimatedLoadingText text={loadingMessage} />
+            ) : (
+              <>
+                <Text {...textStyling}>{content}</Text>
+                {error && (
+                  <Text {...textStyling} color="red.500">
+                    {error}
+                  </Text>
+                )}
+              </>
+            )}
+          </Box>
+        </Stack>
+
+        <HStack
+          gap="6"
+          // alignItems="flex-start"
+
+          alignItems="stretch"
+        >
+          <Flex>
+            {/* Please put the title here */}
+            <Text
+              color="gray.400"
+              fontSize="sm"
+              fontFamily="'Homemade Apple', 'Beth Ellen', 'La Belle Aurore', serif"
+              transform="rotate(-0.1deg)"
+              py={2}
+            >
+              {title.toLowerCase()}
+            </Text>
+          </Flex>
+          <Image
+            opacity={showSignature ? 1 : 0}
+            transition="opacity 0.6s ease-in-out 0.5s"
+            src="/elizabeth-signature.svg"
+            maxH="16"
+            objectFit="contain"
+            alt="Queen elizabeth signature"
+          />
+        </HStack>
+      </Stack>
+    </>
   );
 }
 

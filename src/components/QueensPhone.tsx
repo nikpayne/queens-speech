@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Box, Text, Flex, VStack, HStack, Circle } from "@chakra-ui/react";
 import { keyframes } from "@emotion/react";
-import { queenNotifications } from "./queenNotifications";
+import { queenNotifications } from "./constants";
 
 interface NotificationProps {
   title: string;
@@ -59,8 +59,8 @@ const Notification: React.FC<NotificationProps> = ({
       overflow="hidden"
     >
       <Box
-        bg="rgba(255, 255, 255, 0.25)"
-        backdropFilter="blur(10px)"
+        bg="rgba(255, 255, 255, 0.3)"
+        backdropFilter="blur(12px)"
         borderRadius="1em"
         p="0.75em"
         mb="0.5em"
@@ -226,17 +226,22 @@ const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16.5 }) => {
         w="100%"
         h="100%"
         // bg="linear-gradient(145deg, #FFD700, #FFA500, #FF8C00)"
-        bg="linear-gradient(to bottom, var(--chakra-colors-gray-400), var(--chakra-colors-gray-500))"
+        bg="linear-gradient(to bottom, var(--chakra-colors-gray-500), var(--chakra-colors-gray-600))"
         // bg="gray.200"
         borderRadius="2.5em"
         p="0.3em"
-        boxShadow="0 1em 3em rgba(0,0,0,0.3)"
+        boxShadow="0 1em 2em rgba(0,0,0,0.6)"
       >
         {/* Screen */}
         <Box
           w="100%"
           h="100%"
-          bg="linear-gradient(180deg, #FF6B6B 0%, #FF8E53 50%, #FF6B9D 100%)"
+          // bg="linear-gradient(180deg, #FF6B6B 0%, #FF8E53 50%, #FF6B9D 100%)"
+          // bg='url("https://s.abcnews.com/images/GMA/queen-elizabeth-prince-philip-wedding-gty-jt-210218_1613680291790_hpEmbed_11x14_992.jpg")'
+          // bg='url("../../public/corgi.jpg")'
+          bg='url("/corgi.jpg")'
+          bgSize="cover"
+          bgPos="center center"
           borderRadius="2.2em"
           position="relative"
           overflow="hidden"
@@ -275,10 +280,20 @@ const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16.5 }) => {
 
           {/* Time and Date */}
           <VStack gap="0.2em" color="white" textAlign="center" mt="2em">
-            <Text fontSize="1.1em" fontWeight="400" opacity={0.9}>
+            <Text
+              fontSize="1.1em"
+              fontWeight="500"
+              opacity={0.9}
+              fontFamily="Helvetica"
+            >
               {formatDate(currentTime)}
             </Text>
-            <Text fontSize="4em" fontWeight="200" lineHeight="0.9">
+            <Text
+              fontSize="4em"
+              fontWeight="400"
+              lineHeight="0.9"
+              fontFamily="Helvetica"
+            >
               {formatTime(currentTime)}
             </Text>
           </VStack>

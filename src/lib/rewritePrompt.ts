@@ -1,6 +1,6 @@
 import type { ReferenceArticle } from './referencePicker';
 
-export function generateRefinePrompt(userInput: string, references: ReferenceArticle[]): string {
+export function generateRewritePrompt(userInput: string, references: ReferenceArticle[]): string {
   const referencesText = references.map((ref, index) => {
     return `REFERENCE EXAMPLE ${index + 1}:
 Title: ${ref.title}

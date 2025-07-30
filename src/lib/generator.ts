@@ -1,15 +1,15 @@
 import Anthropic from '@anthropic-ai/sdk';
 import type { ReferenceArticle } from './referencePicker';
 import { generateWritePrompt } from './writePrompt';
-import { generateRefinePrompt } from './refinePrompt';
+import { generateRewritePrompt } from './rewritePrompt';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-export type GenerationMode = "write" | "refine";
+export type GenerationMode = "write" | "rewrite";
 
-function generateRefineTitle(userInput: string): string {
+function generateRewriteTitle(userInput: string): string {
   // Take first few words of user input and create a descriptive title
   const words = userInput.trim().split(/\s+/).slice(0, 6);
   const preview = words.join(' ');
@@ -17,10 +17,10 @@ function generateRefineTitle(userInput: string): string {
   // Truncate if too long and add ellipsis
   const maxLength = 50;
   if (preview.length > maxLength) {
-    return `Refined: ${preview.substring(0, maxLength - 12)}...`;
+    return `Rewritten: ${preview.substring(0, maxLength - 12)}...`;
   }
   
-  return `Refined: ${preview}`;
+  return `Rewritten: ${preview}`;
 }
 
 interface GenerationRequest {
@@ -41,9 +41,9 @@ export async function generateQueenElizabethClickhole(
   const { userInput, mode, references, onChunk } = request;
 
   // Select the appropriate prompt based on mode
-  const prompt = mode === "write" 
+    const prompt = mode === "write"
     ? generateWritePrompt(userInput, references)
-    : generateRefinePrompt(userInput, references);
+    : generateRewritePrompt(userInput, references);
 
   try {
     if (onChunk) {
@@ -71,8 +71,8 @@ export async function generateQueenElizabethClickhole(
           const text = chunk.delta.text;
           fullContent += text;
 
-          if (mode === 'refine') {
-            // For refine mode, everything is body content (no title expected)
+            if (mode === 'rewrite') {
+    // For rewrite mode, everything is body content (no title expected)
             onChunk(text, false);
           } else {
             // For write mode, look for title marker
@@ -107,10 +107,10 @@ export async function generateQueenElizabethClickhole(
       let finalTitle: string;
       let finalBody: string;
       
-      if (mode === 'refine') {
-        // For refine mode, entire content is body, generate a descriptive title
+      if (mode === 'rewrite') {
+        // For rewrite mode, entire content is body, generate a descriptive title
         finalBody = fullContent.trim();
-        finalTitle = generateRefineTitle(userInput);
+        finalTitle = generateRewriteTitle(userInput);
       } else {
         // For write mode, look for title marker
         const titleMarkerIndex = fullContent.indexOf('TITLE:');
@@ -125,7 +125,7 @@ export async function generateQueenElizabethClickhole(
       }
       
       return {
-        title: finalTitle || (mode === 'refine' ? generateRefineTitle(userInput) : "Generated Article"),
+        title: finalTitle || (mode === 'rewrite' ? generateRewriteTitle(userInput) : "Generated Article"),
         body: finalBody || "Content not found"
       };
     } else {
@@ -150,10 +150,10 @@ export async function generateQueenElizabethClickhole(
         let title: string;
         let body: string;
         
-        if (mode === 'refine') {
-          // For refine mode, entire content is body, generate a descriptive title
+        if (mode === 'rewrite') {
+          // For rewrite mode, entire content is body, generate a descriptive title
           body = responseText;
-          title = generateRefineTitle(userInput);
+          title = generateRewriteTitle(userInput);
         } else {
           // For write mode, look for the title marker
           const titleMarkerIndex = responseText.indexOf('TITLE:');
@@ -169,7 +169,7 @@ export async function generateQueenElizabethClickhole(
         }
         
         return {
-          title: title || (mode === 'refine' ? generateRefineTitle(userInput) : "Generated Article"),
+          title: title || (mode === 'rewrite' ? generateRewriteTitle(userInput) : "Generated Article"),
           body: body || "Content not found"
         };
       } else {

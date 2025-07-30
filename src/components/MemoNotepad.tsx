@@ -94,7 +94,7 @@ export default function MemoNotepad({
           />
 
           <HStack w="100%" justifyContent="center" py="4">
-            {(["write", "refine"] as const).map((modeOption) => (
+            {(["write", "rewrite"] as const).map((modeOption) => (
               <Box
                 key={modeOption}
                 position="relative"
@@ -112,7 +112,6 @@ export default function MemoNotepad({
                     transform="translate(-50%, -50%)"
                     w="auto"
                     h="2em"
-                    // objectFit="contain"
                     zIndex={0}
                     opacity={0.5}
                   />
@@ -121,8 +120,6 @@ export default function MemoNotepad({
                   fontSize="md"
                   fontFamily="'Homemade Apple', 'Beth Ellen', 'La Belle Aurore', serif"
                   textAlign="center"
-                  // position="relative"
-                  // zIndex={1}
                   color={mode === modeOption ? "gray.800" : "gray.500"}
                   fontWeight={mode === modeOption ? "bold" : "normal"}
                   transition="all 0.2s ease"
@@ -139,17 +136,12 @@ export default function MemoNotepad({
           <Button
             onClick={onGenerate}
             variant="solid"
-            // bg="blackAlpha.100"
             borderRadius="sm"
             w="full"
             fontSize="lg"
-            // fontFamily="'Homemade Apple','Cormorant SC', 'Playfair Display', serif"
-            // fontFamily="'Cormorant SC', 'Playfair Display', serif"
             fontFamily="UnifrakturMaguntia"
-            // fontWeight="bold"
             loading={isLoading}
             disabled={isLoading || !userInput.trim()}
-            // letterSpacing="0.1em"
           >
             Give to the Queen
           </Button>

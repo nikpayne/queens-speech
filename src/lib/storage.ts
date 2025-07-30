@@ -1,7 +1,7 @@
 export interface GenerationHistory {
   id: string;
   prompt: string;
-  mode?: 'write' | 'refine'; // Add mode to distinguish between different generation types
+  mode?: 'write' | 'rewrite'; // Add mode to distinguish between different generation types
   title: string;
   content: string;
   timestamp: number;
