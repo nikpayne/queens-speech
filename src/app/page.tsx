@@ -9,19 +9,20 @@ import {
   Grid,
   GridItem,
   useBreakpointValue,
-  Button,
 } from "@chakra-ui/react";
 import MemoNotepad from "@/components/MemoNotepad";
 import ArticleStationary from "@/components/ArticleStationary";
 import {
   getGenerationHistory,
   deleteGeneration,
+  clearGenerationHistory,
   GenerationHistory,
 } from "@/lib/storage";
 import type { GenerationMode } from "@/lib/generator";
 import { useGeneration } from "@/hooks/useGeneration";
 
 import QueensPhone from "@/components/QueensPhone";
+import AboutModal from "@/components/AboutModal";
 
 export default function Home() {
   const [userInput, setUserInput] = useState("");
@@ -29,6 +30,9 @@ export default function Home() {
   const [generationHistory, setGenerationHistory] = useState<
     GenerationHistory[]
   >([]);
+  // Index into `generationHistory` of the article currently shown in the
+  // single notepad. 0 is the most recent generation.
+  const [historyIndex, setHistoryIndex] = useState(0);
 
   // Use the generation hook
   const {
@@ -39,9 +43,10 @@ export default function Home() {
     streamingTitle,
   } = useGeneration({
     onGenerationSaved: () => {
-      // Update generation history when a generation is saved
+      // A new generation was just saved → jump back to the latest entry.
       const updatedHistory = getGenerationHistory();
       setGenerationHistory(updatedHistory);
+      setHistoryIndex(0);
     },
   });
 
@@ -50,34 +55,81 @@ export default function Home() {
     setGenerationHistory(history);
   }, []);
 
-  const handleDelete = (id: string) => {
-    deleteGeneration(id);
+  const handleDeleteCurrent = () => {
+    const current = generationHistory[historyIndex];
+    if (!current) return;
+    deleteGeneration(current.id);
     const updatedHistory = getGenerationHistory();
     setGenerationHistory(updatedHistory);
+    setHistoryIndex((idx) =>
+      Math.min(idx, Math.max(0, updatedHistory.length - 1))
+    );
+  };
+
+  const handlePrev = () => {
+    setHistoryIndex((idx) => Math.min(idx + 1, generationHistory.length - 1));
+  };
+
+  const handleNext = () => {
+    setHistoryIndex((idx) => Math.max(idx - 1, 0));
   };
 
   const handleCopy = () => {
     console.log("Article copied to clipboard");
   };
 
-  const handleLogLocalStorage = () => {
-    const history = getGenerationHistory();
-    console.log("=== LOCALSTORAGE DEBUG ===");
-    console.log("Total generations:", history.length);
-    console.log("Generation history:", history);
-    console.log(
-      "Raw localStorage data:",
-      localStorage.getItem("queens-speech-history")
-    );
-    console.log("========================");
-  };
+  // Expose `debug()` and `reset()` helpers on `window` so localStorage can be
+  // inspected and cleared from the browser console without any visible UI.
+  useEffect(() => {
+    const debug = () => {
+      const history = getGenerationHistory();
+      console.log("=== LOCALSTORAGE DEBUG ===");
+      console.log("Total generations:", history.length);
+      console.log("Generation history:", history);
+      console.log(
+        "Raw localStorage data:",
+        localStorage.getItem("queens-speech-history")
+      );
+      console.log("========================");
+      return history;
+    };
+    const reset = () => {
+      clearGenerationHistory();
+      setGenerationHistory([]);
+      setHistoryIndex(0);
+      console.log("Generation history cleared.");
+    };
+    const w = window as unknown as { debug: typeof debug; reset: typeof reset };
+    w.debug = debug;
+    w.reset = reset;
+    return () => {
+      delete (window as unknown as { debug?: typeof debug }).debug;
+      delete (window as unknown as { reset?: typeof reset }).reset;
+    };
+  }, []);
 
-  const success = result && result.success;
-  const articleContent = success
-    ? result.article || ""
-    : streamingContent || "";
-  const articleTitle = success ? result.title || "" : streamingTitle || "";
-  const showSignature = Boolean(success && !isLoading && !streamingContent);
+  // While a generation is streaming we show the live partial content. Once it
+  // finishes (or whenever the user is just browsing), we show the entry from
+  // history at `historyIndex`. The single notepad holds everything.
+  const isStreaming = isLoading || Boolean(streamingContent);
+  const safeHistoryIndex = Math.min(
+    historyIndex,
+    Math.max(0, generationHistory.length - 1)
+  );
+  const currentEntry: GenerationHistory | undefined =
+    generationHistory[safeHistoryIndex];
+
+  const articleContent = isStreaming
+    ? streamingContent || ""
+    : currentEntry?.content || "";
+  const articleTitle = isStreaming
+    ? streamingTitle || ""
+    : currentEntry?.title || "";
+  const showSignature = !isStreaming && Boolean(currentEntry);
+  const isEmpty =
+    !isStreaming &&
+    !result?.error &&
+    generationHistory.length === 0;
 
   const penImage = useBreakpointValue({
     base: "/fountain-pen-rotated.png",
@@ -87,40 +139,22 @@ export default function Home() {
   return (
     <Box
       minH="100vh"
-      bgImage="url('https://media1.thehungryjpeg.com/thumbs2/ori_112089_038b9609023e963d7cc9d48242cb5541e9d03ff5_20-dark-wood-background-textures.jpg')"
+      bgImage="url('/wood-background.png')"
       bgAttachment="fixed"
       bgSize="cover"
       bgRepeat="no-repeat"
       position="relative"
     >
-      {/* Debug button - top right corner */}
-      <Button
-        position="fixed"
-        top="4"
-        right="4"
-        size="sm"
-        colorScheme="gray"
-        variant="solid"
-        onClick={handleLogLocalStorage}
-        zIndex="1000"
-        bg="blackAlpha.700"
-        color="white"
-        _hover={{ bg: "blackAlpha.800" }}
-      >
-        Debug Storage
-      </Button>
       <Grid
         gridTemplateAreas={{
           base: `
           "pen"
           "notepad"
           "article"
-          "history"
           "phone"
         `,
           lg: `
           "pen notepad article phone ."
-          ". . history . ."
         `,
         }}
         gridTemplateColumns={{
@@ -185,28 +219,25 @@ export default function Home() {
               showPaperHolders={true}
               isLoading={isLoading}
               error={result?.error}
+              isEmpty={isEmpty}
+              onDelete={
+                !isStreaming && currentEntry ? handleDeleteCurrent : undefined
+              }
+              currentIndex={
+                !isStreaming && generationHistory.length > 0
+                  ? safeHistoryIndex
+                  : undefined
+              }
+              totalCount={
+                !isStreaming ? generationHistory.length : undefined
+              }
+              onPrev={handlePrev}
+              onNext={handleNext}
             />
           </Stack>
         </GridItem>
-
-        <GridItem area="history">
-          {generationHistory.length > 0 && !isLoading && !streamingContent && (
-            <Stack gap={6} mt={8}>
-              {(result ? generationHistory.slice(1) : generationHistory).map(
-                (generation) => (
-                  <ArticleStationary
-                    key={generation.id}
-                    content={generation.content}
-                    title={generation.title}
-                    showSignature={true}
-                    onDelete={() => handleDelete(generation.id)}
-                  />
-                )
-              )}
-            </Stack>
-          )}
-        </GridItem>
       </Grid>
+      <AboutModal />
     </Box>
   );
 }

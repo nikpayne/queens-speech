@@ -112,7 +112,9 @@ const Notification: React.FC<NotificationProps> = ({
 };
 
 const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16.5 }) => {
-  const [currentTime, setCurrentTime] = useState(new Date());
+  // Initialize as null so server and client render the same markup; the actual
+  // time is only set after mount to avoid React hydration mismatches.
+  const [currentTime, setCurrentTime] = useState<Date | null>(null);
   const [visibleNotifications, setVisibleNotifications] = useState<
     NotificationProps[]
   >([]);
@@ -138,6 +140,7 @@ const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16.5 }) => {
 
   // Update time every second
   useEffect(() => {
+    setCurrentTime(new Date());
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
@@ -236,12 +239,7 @@ const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16.5 }) => {
         <Box
           w="100%"
           h="100%"
-          // bg="linear-gradient(180deg, #FF6B6B 0%, #FF8E53 50%, #FF6B9D 100%)"
-          // bg='url("https://s.abcnews.com/images/GMA/queen-elizabeth-prince-philip-wedding-gty-jt-210218_1613680291790_hpEmbed_11x14_992.jpg")'
-          // bg='url("../../public/corgi.jpg")'
-          bg='url("/corgi.jpg")'
-          bgSize="cover"
-          bgPos="center center"
+          bg="linear-gradient(180deg, #FF6B6B 0%, #FF8E53 50%, #FF6B9D 100%)"
           borderRadius="2.2em"
           position="relative"
           overflow="hidden"
@@ -285,16 +283,18 @@ const QueensPhone: React.FC<QueensPhoneProps> = ({ baseSize = 16.5 }) => {
               fontWeight="500"
               opacity={0.9}
               fontFamily="Helvetica"
+              suppressHydrationWarning
             >
-              {formatDate(currentTime)}
+              {currentTime ? formatDate(currentTime) : "\u00A0"}
             </Text>
             <Text
               fontSize="4em"
               fontWeight="400"
               lineHeight="0.9"
               fontFamily="Helvetica"
+              suppressHydrationWarning
             >
-              {formatTime(currentTime)}
+              {currentTime ? formatTime(currentTime) : "\u00A0"}
             </Text>
           </VStack>
 

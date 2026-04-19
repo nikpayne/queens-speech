@@ -10,7 +10,7 @@ import {
 } from "@chakra-ui/react";
 import { Toaster, toaster } from "@/components/ui/toaster";
 import { Tooltip } from "@/components/ui/tooltip";
-import { MdContentCopy, MdDelete } from "react-icons/md";
+import { ChevronLeft, ChevronRight, Copy, Trash2 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { keyframes } from "@emotion/react";
 import { LOADING_PHRASES } from "./constants";
@@ -23,7 +23,22 @@ interface ArticleStationaryProps {
   isLoading?: boolean;
   error?: string;
   onDelete?: () => void;
+  isEmpty?: boolean;
+  /** 1-based index of the currently shown history item */
+  currentIndex?: number;
+  /** Total number of history items; pagination only renders when > 1 */
+  totalCount?: number;
+  onPrev?: () => void;
+  onNext?: () => void;
 }
+
+const EMPTY_STATE_TITLE = "Welcoem To My Desk , (The Desk Of Qween Elizabath II)";
+
+const EMPTY_STATE_PARAGRAPHS = [
+  "You can see my Pensil Cup and my Stappeler and also a Photogrpah of my Horse , his name is Brimbleston , Lovely Horse ,",
+  'But the Main Thing is the Notepadd becuase that is what this Desk is All Abuot , you simplay type in there and the Words come Out , sometime I type a Notee and sometime I Rewriet a Texxt that somone has gievn to me and I say "Hmm , Let me Rewrite That" and then I do it on The Noteppad , Very Simpal ,',
+  "Welcom again to the Desk , it is my Desk , Enjouy",
+];
 
 interface AnimatedLoadingTextProps {
   text: string;
@@ -38,9 +53,12 @@ function AnimatedLoadingText({ text }: AnimatedLoadingTextProps) {
       opacity: 1;
     }
   `;
+  // Always strip any caller-supplied trailing punctuation/whitespace and
+  // re-append "..." here, so loading state has consistent dots in one place.
+  const trimmed = text.replace(/[.\s]+$/u, "");
+  const fullText = `${trimmed}...`;
   const TOTAL_DURATION = 0.5; // seconds
-  const numchars = text.length;
-  const durationPerChar = TOTAL_DURATION / numchars;
+  const durationPerChar = TOTAL_DURATION / fullText.length;
 
   return (
     <Text
@@ -50,7 +68,7 @@ function AnimatedLoadingText({ text }: AnimatedLoadingTextProps) {
       whiteSpace="pre-wrap"
       color="gray.600"
     >
-      {text.split("").map((char, index) => (
+      {fullText.split("").map((char, index) => (
         <Box
           key={index}
           as="span"
@@ -77,7 +95,16 @@ export default function ArticleStationary({
   isLoading = false,
   error = "",
   onDelete,
+  isEmpty = false,
+  currentIndex,
+  totalCount,
+  onPrev,
+  onNext,
 }: ArticleStationaryProps) {
+  const showPagination =
+    typeof currentIndex === "number" &&
+    typeof totalCount === "number" &&
+    totalCount > 1;
   const [isHovered, setIsHovered] = useState(false);
 
   // Pick a random loading message when loading starts
@@ -141,22 +168,20 @@ export default function ArticleStationary({
             size="sm"
             variant="ghost"
             position="absolute"
-            top={4}
-            right={4}
+            top={3}
+            right={3}
             opacity={isHovered ? 1 : 0}
             transition="opacity 0.2s ease-in-out"
-            bg="white"
-            boxShadow="sm"
-            borderRadius="md"
-            p={1}
+            gap={1}
           >
             <Tooltip content="Copy article">
               <IconButton
                 aria-label="Copy article"
                 onClick={handleCopy}
-                _hover={{ bg: "gray.100" }}
+                color="gray.500"
+                _hover={{ bg: "blackAlpha.100", color: "gray.800" }}
               >
-                <MdContentCopy />
+                <Copy size={16} />
               </IconButton>
             </Tooltip>
             {onDelete && (
@@ -164,18 +189,61 @@ export default function ArticleStationary({
                 <IconButton
                   aria-label="Delete article"
                   onClick={onDelete}
+                  color="gray.500"
                   _hover={{ bg: "red.100", color: "red.600" }}
                 >
-                  <MdDelete />
+                  <Trash2 size={16} />
                 </IconButton>
               </Tooltip>
             )}
           </ButtonGroup>
         )}
 
+        {showPagination && (
+          <HStack
+            position="absolute"
+            top={3}
+            left="50%"
+            transform="translateX(-50%)"
+            justify="center"
+            align="center"
+            gap={1}
+            opacity={isHovered ? 1 : 0}
+            transition="opacity 0.2s ease-in-out"
+            userSelect="none"
+            zIndex={1}
+          >
+            <IconButton
+              aria-label="Older article"
+              size="sm"
+              variant="ghost"
+              color="gray.500"
+              _hover={{ bg: "blackAlpha.100", color: "gray.800" }}
+              onClick={onPrev}
+              disabled={currentIndex! >= totalCount! - 1}
+            >
+              <ChevronLeft size={16} />
+            </IconButton>
+            <Text fontFamily="monospace" fontSize="xs" color="gray.500">
+              {totalCount! - currentIndex!} of {totalCount}
+            </Text>
+            <IconButton
+              aria-label="Newer article"
+              size="sm"
+              variant="ghost"
+              color="gray.500"
+              _hover={{ bg: "blackAlpha.100", color: "gray.800" }}
+              onClick={onNext}
+              disabled={currentIndex! <= 0}
+            >
+              <ChevronRight size={16} />
+            </IconButton>
+          </HStack>
+        )}
+
         <Stack direction="column" gap={6}>
           {/* Header section for Buckingham Palace logo */}
-          <Box textAlign="center" py={4}>
+          <Box textAlign="center" py={4} position="relative">
             <Box
               h="120px"
               display="flex"
@@ -196,6 +264,15 @@ export default function ArticleStationary({
           <Box>
             {isLoading && !content ? (
               <AnimatedLoadingText text={loadingMessage} />
+            ) : isEmpty ? (
+              <Stack gap={5}>
+                <Text {...textStyling}>{EMPTY_STATE_TITLE}</Text>
+                {EMPTY_STATE_PARAGRAPHS.map((paragraph, index) => (
+                  <Text key={index} {...textStyling}>
+                    {paragraph}
+                  </Text>
+                ))}
+              </Stack>
             ) : (
               <>
                 <Text {...textStyling}>{content}</Text>

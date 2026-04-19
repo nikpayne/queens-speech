@@ -1,5 +1,5 @@
 export const LOADING_PHRASES = [
-  "thinkimg...",
+  "thinkimg",
   "bloggin in",
   "computeringg",
   "writyng",
