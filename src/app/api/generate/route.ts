@@ -46,8 +46,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Pick random references for variety
-    const relevantReferences = pickRandomReferences(allReferences, 2);
+    // Pick a single random reference to few-shot with
+    const relevantReferences = pickRandomReferences(allReferences, 1);
 
     // Create a readable stream for the response
     const encoder = new TextEncoder();
@@ -70,6 +70,10 @@ export async function POST(request: NextRequest) {
             userInput,
             mode: mode as GenerationMode,
             references: relevantReferences,
+            onPrompt: (prompt: string) => {
+              const data = { type: 'prompt', prompt };
+              controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
+            },
             onChunk: (chunk: string, isTitle: boolean) => {
               const data = {
                 type: isTitle ? 'title' : 'content',

@@ -28,6 +28,8 @@ interface GenerationRequest {
   mode: GenerationMode;
   references: ReferenceArticle[];
   onChunk?: (chunk: string, isTitle: boolean) => void;
+  /** Called once with the fully-built prompt before it's sent to the model. */
+  onPrompt?: (prompt: string) => void;
 }
 
 interface GenerationResult {
@@ -38,12 +40,14 @@ interface GenerationResult {
 export async function generateQueenElizabethClickhole(
   request: GenerationRequest
 ): Promise<GenerationResult> {
-  const { userInput, mode, references, onChunk } = request;
+  const { userInput, mode, references, onChunk, onPrompt } = request;
 
   // Select the appropriate prompt based on mode
     const prompt = mode === "write"
     ? generateWritePrompt(userInput, references)
     : generateRewritePrompt(userInput, references);
+
+  onPrompt?.(prompt);
 
   try {
     if (onChunk) {

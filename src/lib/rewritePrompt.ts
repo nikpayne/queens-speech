@@ -40,5 +40,5 @@ Sometimes when your very tire of life you just want to crawl into you're favrite
 
 
 
-Now rewrite this text:`;
+Now rewrite the text`;
 } 

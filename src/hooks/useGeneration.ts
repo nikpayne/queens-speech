@@ -88,6 +88,13 @@ export function useGeneration(options: UseGenerationOptions = {}): UseGeneration
 
               if (data.type === "metadata") {
                 usedReferences = data.usedReferences;
+              } else if (data.type === "prompt") {
+                console.log(
+                  `%c===== PROMPT SENT TO MODEL =====\n%c${data.prompt}\n%c===== END PROMPT =====`,
+                  "color: #888; font-weight: bold;",
+                  "color: inherit;",
+                  "color: #888; font-weight: bold;"
+                );
               } else if (data.type === "title") {
                 accumulatedTitle += data.chunk;
                 setStreamingTitle(accumulatedTitle);
