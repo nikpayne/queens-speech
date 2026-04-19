@@ -1,11 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateQueenElizabethClickhole, type GenerationMode } from '@/lib/generator';
 import { getAllReferences, pickRandomReferences } from '@/lib/referencePicker';
+import {
+  DEFAULT_MODEL_TIER,
+  DEFAULT_SAMPLE_COUNT,
+  MAX_SAMPLE_COUNT,
+  type ModelTier,
+} from '@/lib/generationConfig';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { userInput, mode = "write" } = body;
+    const {
+      userInput,
+      mode = "write",
+      sampleCount = DEFAULT_SAMPLE_COUNT,
+      modelTier = DEFAULT_MODEL_TIER,
+    } = body;
 
     if (!userInput || typeof userInput !== 'string') {
       return NextResponse.json(
@@ -28,6 +39,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    if (
+      typeof sampleCount !== 'number' ||
+      !Number.isInteger(sampleCount) ||
+      sampleCount < 1 ||
+      sampleCount > MAX_SAMPLE_COUNT
+    ) {
+      return NextResponse.json(
+        { error: `sampleCount must be an integer between 1 and ${MAX_SAMPLE_COUNT}` },
+        { status: 400 }
+      );
+    }
+
+    if (modelTier !== 'cheap' && modelTier !== 'fancy') {
+      return NextResponse.json(
+        { error: 'modelTier must be "cheap" or "fancy"' },
+        { status: 400 }
+      );
+    }
+
     // Check if API key is configured
     if (!process.env.ANTHROPIC_API_KEY) {
       return NextResponse.json(
@@ -46,8 +76,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Pick a single random reference to few-shot with
-    const relevantReferences = pickRandomReferences(allReferences, 1);
+    // Pick random references for few-shot examples.
+    const relevantReferences = pickRandomReferences(allReferences, sampleCount);
 
     // Create a readable stream for the response
     const encoder = new TextEncoder();
@@ -70,6 +100,7 @@ export async function POST(request: NextRequest) {
             userInput,
             mode: mode as GenerationMode,
             references: relevantReferences,
+            modelTier: modelTier as ModelTier,
             onPrompt: (prompt: string) => {
               const data = { type: 'prompt', prompt };
               controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));

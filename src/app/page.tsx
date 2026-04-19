@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Box,
   Image,
@@ -20,6 +20,13 @@ import {
 } from "@/lib/storage";
 import type { GenerationMode } from "@/lib/generator";
 import { useGeneration } from "@/hooks/useGeneration";
+import {
+  DEFAULT_MODEL_TIER,
+  DEFAULT_SAMPLE_COUNT,
+  MAX_SAMPLE_COUNT,
+  MODEL_BY_TIER,
+  type ModelTier,
+} from "@/lib/generationConfig";
 
 import QueensPhone from "@/components/QueensPhone";
 import AboutModal from "@/components/AboutModal";
@@ -33,6 +40,11 @@ export default function Home() {
   // Index into `generationHistory` of the article currently shown in the
   // single notepad. 0 is the most recent generation.
   const [historyIndex, setHistoryIndex] = useState(0);
+  // Runtime-only setting (not persisted): how many reference samples to send.
+  const [sampleCount, setSampleCount] = useState(DEFAULT_SAMPLE_COUNT);
+  // Runtime-only setting (not persisted): choose cheap vs fancy model tier.
+  const [modelTier, setModelTier] = useState<ModelTier>(DEFAULT_MODEL_TIER);
+  const hasShownConsoleHelp = useRef(false);
 
   // Use the generation hook
   const {
@@ -99,14 +111,65 @@ export default function Home() {
       setHistoryIndex(0);
       console.log("Generation history cleared.");
     };
-    const w = window as unknown as { debug: typeof debug; reset: typeof reset };
+    const samples = (count: number) => {
+      if (!Number.isInteger(count) || count < 1 || count > MAX_SAMPLE_COUNT) {
+        console.warn(
+          `samples(n): n must be an integer between 1 and ${MAX_SAMPLE_COUNT}`
+        );
+        return sampleCount;
+      }
+      setSampleCount(count);
+      console.log(`sampleCount updated to ${count}`);
+      return count;
+    };
+    const model = (tier: ModelTier) => {
+      if (tier !== "cheap" && tier !== "fancy") {
+        console.warn('model(tier): tier must be "cheap" or "fancy"');
+        return modelTier;
+      }
+      setModelTier(tier);
+      console.log(`model tier updated to ${tier} (${MODEL_BY_TIER[tier]})`);
+      return tier;
+    };
+    const showConsoleHelp = () => {
+      console.log(
+        `\n=== QUEEN'S SPEECH CONSOLE COMMANDS ===\n` +
+          `debug()   -> log saved history/localStorage\n` +
+          `reset()   -> clear generation history\n` +
+          `samples(n)-> set few-shot sample count (1-${MAX_SAMPLE_COUNT})\n\n` +
+          `model(t)  -> set model tier: "cheap" | "fancy"\n\n` +
+          `Current settings:\n` +
+          `modelTier=${modelTier}\n` +
+          `model=${MODEL_BY_TIER[modelTier]}\n` +
+          `sampleCount=${sampleCount}\n` +
+          `======================================\n`
+      );
+    };
+    const w = window as unknown as {
+      debug: typeof debug;
+      reset: typeof reset;
+      samples: typeof samples;
+      model: typeof model;
+      commands: typeof showConsoleHelp;
+    };
     w.debug = debug;
     w.reset = reset;
+    w.samples = samples;
+    w.model = model;
+    w.commands = showConsoleHelp;
+    // Show discoverability/help once on first load.
+    if (!hasShownConsoleHelp.current) {
+      showConsoleHelp();
+      hasShownConsoleHelp.current = true;
+    }
     return () => {
       delete (window as unknown as { debug?: typeof debug }).debug;
       delete (window as unknown as { reset?: typeof reset }).reset;
+      delete (window as unknown as { samples?: typeof samples }).samples;
+      delete (window as unknown as { model?: typeof model }).model;
+      delete (window as unknown as { commands?: typeof showConsoleHelp }).commands;
     };
-  }, []);
+  }, [sampleCount, modelTier]);
 
   // While a generation is streaming we show the live partial content. Once it
   // finishes (or whenever the user is just browsing), we show the entry from
@@ -196,7 +259,12 @@ export default function Home() {
               mode={mode}
               onUserInputChange={setUserInput}
               onModeChange={setMode}
-              onGenerate={() => handleGenerate(userInput, mode)}
+              onGenerate={() => {
+                // Start every run from the newest slot so we don't keep a stale
+                // "viewing older history" index while new content is generated.
+                setHistoryIndex(0);
+                handleGenerate(userInput, mode, sampleCount, modelTier);
+              }}
               isLoading={isLoading}
             />
           </Box>

@@ -25,11 +25,11 @@ ${referencesText}
 
 - Take the existing text and rewrite it completely in the Queen Elizabeth Clickhole style. 
 - Keep the core meaning and ideas, but transform the language, tone, and structure to match the reference examples. 
-- Add misspellings, typos, absurd syntax, and the distinctive voice shown in the samples.
+- Mirror any misspellings, typos, absurd syntax, and the distinctive voice shown in the samples.
 - Do NOT add a title or introduction to the output
 - Do NOT write an entire article, just rewrite the existing text in the style of the reference examples
-- The number of paragraphs you return should be the same as the input
-- The sentences in those paragraphscan be shorter or longer as needed
+- The output length should match the input length, same number of sentences or paragraphs
+- The sentences in those paragraphs can be shorter or longer as needed
 
 
 Example input: 

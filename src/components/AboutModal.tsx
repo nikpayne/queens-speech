@@ -5,6 +5,7 @@ import {
   Button,
   CloseButton,
   Dialog,
+  Flex,
   Heading,
   Image,
   Link,
@@ -12,7 +13,6 @@ import {
   Stack,
   Text,
 } from "@chakra-ui/react";
-import { Info } from "lucide-react";
 
 export default function AboutModal() {
   return (
@@ -22,10 +22,30 @@ export default function AboutModal() {
           position="fixed"
           bottom={4}
           right={4}
-          size="sm"
+          h="3rem"
+          p={0}
+          pr={4}
+          bg="black"
+          color="white"
+          borderRadius="md"
+          overflow="hidden"
+          boxShadow="lg"
+          _hover={{ bg: "gray.800" }}
           zIndex={100}
         >
-          Whaht is thsi?
+          <Flex align="center" h="100%">
+            <Image
+              src="/about-thumbnail.png"
+              alt="Queen thumbnail"
+              // w="2.75rem"
+              h="100%"
+              objectFit="cover"
+              flexShrink={0}
+            />
+            <Text pl={3} fontFamily="monospace" fontSize="sm" fontWeight="500">
+             ???
+            </Text>
+          </Flex>
         </Button>
       </Dialog.Trigger>
       <Portal>

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { saveGeneration, getGenerationHistory } from "@/lib/storage";
 import type { GenerationMode } from "@/lib/generator";
+import type { ModelTier } from "@/lib/generationConfig";
 
 interface GenerationResult {
   success: boolean;
@@ -14,7 +15,12 @@ interface GenerationResult {
 }
 
 interface UseGenerationReturn {
-  handleGenerate: (userInput: string, mode: GenerationMode) => Promise<void>;
+  handleGenerate: (
+    userInput: string,
+    mode: GenerationMode,
+    sampleCount?: number,
+    modelTier?: ModelTier
+  ) => Promise<void>;
   result: GenerationResult | null;
   isLoading: boolean;
   streamingContent: string;
@@ -32,7 +38,12 @@ export function useGeneration(options: UseGenerationOptions = {}): UseGeneration
   const [streamingContent, setStreamingContent] = useState("");
   const [streamingTitle, setStreamingTitle] = useState("");
 
-  const handleGenerate = async (userInput: string, mode: GenerationMode) => {
+  const handleGenerate = async (
+    userInput: string,
+    mode: GenerationMode,
+    sampleCount = 1,
+    modelTier: ModelTier = "cheap"
+  ) => {
     if (!userInput.trim()) {
       setResult({
         success: false,
@@ -55,6 +66,8 @@ export function useGeneration(options: UseGenerationOptions = {}): UseGeneration
         body: JSON.stringify({
           userInput: userInput.trim(),
           mode: mode,
+          sampleCount,
+          modelTier,
         }),
       });
 
