@@ -57,7 +57,7 @@ export async function generateQueenElizabethClickhole(
       // Handle streaming response
       const stream = await anthropic.messages.create({
         model,
-        max_tokens: 2000,
+        max_tokens: 3000,
         temperature: 0.5,
         stream: true,
         messages: [

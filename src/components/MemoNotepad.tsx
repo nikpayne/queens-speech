@@ -74,7 +74,7 @@ export default function MemoNotepad({
             }}
             rows={isMobile ? 6 : 10}
             autoresize
-            maxLength={2000}
+            maxLength={3000}
             bg="transparent"
             border="none"
             outline="none"
