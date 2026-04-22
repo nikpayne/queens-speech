@@ -5,6 +5,7 @@ import { generateRewritePrompt } from './rewritePrompt';
 import {
   DEFAULT_MODEL_TIER,
   GENERATION_TEMPERATURE,
+  TOKEN_OUTPUT_CAP,
   MODEL_BY_TIER,
   type ModelTier,
 } from './generationConfig';
@@ -71,7 +72,7 @@ export async function generateQueenElizabethClickhole(
       // Handle streaming response
       const stream = await anthropic.messages.create({
         model,
-        max_tokens: 3000,
+        max_tokens: TOKEN_OUTPUT_CAP.streaming,
         temperature,
         stream: true,
         messages: [
@@ -153,7 +154,7 @@ export async function generateQueenElizabethClickhole(
       // Handle non-streaming response (fallback)
       const response = await anthropic.messages.create({
         model,
-        max_tokens: 2500,
+        max_tokens: TOKEN_OUTPUT_CAP.nonStreaming,
         temperature,
         stream: false,
         messages: [

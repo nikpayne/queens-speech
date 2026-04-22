@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateQueenElizabethClickhole, type GenerationMode } from '@/lib/generator';
-import { getAllReferences, pickRandomReferences } from '@/lib/referencePicker';
+import { getAllReferences, type ReferenceArticle } from '@/lib/referencePicker';
 import {
   DEFAULT_MODEL_TIER,
   DEFAULT_SAMPLE_COUNT,
@@ -10,6 +10,46 @@ import {
   MIN_TEMPERATURE,
   type ModelTier,
 } from '@/lib/generationConfig';
+
+// Shuffle-bag sampler to reduce short-term repeat bias.
+// Instead of independent random picks each request, we cycle through a shuffled
+// pool of references and only reshuffle once exhausted.
+let referenceShuffleBag: string[] = [];
+
+function refillShuffleBag(references: ReferenceArticle[]) {
+  referenceShuffleBag = references.map((ref) => ref.filename);
+  for (let i = referenceShuffleBag.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [referenceShuffleBag[i], referenceShuffleBag[j]] = [
+      referenceShuffleBag[j],
+      referenceShuffleBag[i],
+    ];
+  }
+}
+
+function pickFromShuffleBag(
+  references: ReferenceArticle[],
+  sampleCount: number
+): ReferenceArticle[] {
+  const byFilename = new Map(references.map((ref) => [ref.filename, ref]));
+  const desired = Math.min(sampleCount, references.length);
+  const selected: ReferenceArticle[] = [];
+
+  while (selected.length < desired) {
+    if (referenceShuffleBag.length === 0) {
+      refillShuffleBag(references);
+    }
+    const filename = referenceShuffleBag.shift();
+    if (!filename) break;
+    const ref = byFilename.get(filename);
+    if (!ref) continue;
+    // Prevent duplicates within a single request.
+    if (selected.some((item) => item.filename === ref.filename)) continue;
+    selected.push(ref);
+  }
+
+  return selected;
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -92,8 +132,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Pick random references for few-shot examples.
-    const relevantReferences = pickRandomReferences(allReferences, sampleCount);
+    // Pick references from a shuffle-bag to avoid heavy short-run repetition.
+    const relevantReferences = pickFromShuffleBag(allReferences, sampleCount);
 
     // Create a readable stream for the response
     const encoder = new TextEncoder();

@@ -21,7 +21,11 @@ USER INPUT TO TRANSFORM:
 WRITING SAMPLES:
 ${referencesText}
 
-Write a complete Clickhole-style article. Write the article content FIRST, then on a new line after "TITLE:" write the clickhole-style title.
+Write a complete Clickhole-style article in the style of the reference examples. 
+- Lean into the absurdities of the writing style. Syntax, typos, misspellings, distinctive and funny
+- Embody the queen
+
+Write the article content FIRST, then on a new line after "TITLE:" write the clickhole-style title. 
 
 Example format:
 This is the article body content that comes first...

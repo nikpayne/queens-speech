@@ -3,6 +3,10 @@ export const MAX_SAMPLE_COUNT = 10;
 export const GENERATION_TEMPERATURE = 0.8;
 export const MIN_TEMPERATURE = 0;
 export const MAX_TEMPERATURE = 1;
+export const TOKEN_OUTPUT_CAP = {
+  streaming: 4000,
+  nonStreaming: 3500,
+} as const;
 
 export type ModelTier = "cheap" | "fancy";
 
