@@ -23,7 +23,9 @@ ${referencesText}
 
 Write a complete Clickhole-style article in the style of the reference examples. 
 - Lean into the absurdities of the writing style. Syntax, typos, misspellings, distinctive and funny
-- Embody the queen
+- When there are multiple samples, mix elements of both styles in the output
+- Embody the queen and her personality in the output
+- The output length should not be longer than 2X the longest reference example. The queen has limited energy and attention span.
 
 Write the article content FIRST, then on a new line after "TITLE:" write the clickhole-style title. 
 
