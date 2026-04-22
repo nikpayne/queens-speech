@@ -167,6 +167,7 @@ export default function Home() {
           `======================================\n`
       );
     };
+    
     const w = window as unknown as {
       debug: typeof debug;
       reset: typeof reset;
