@@ -7,6 +7,7 @@ import {
   Image,
   IconButton,
   ButtonGroup,
+  useBreakpointValue,
 } from "@chakra-ui/react";
 import { Toaster, toaster } from "@/components/ui/toaster";
 import { Tooltip } from "@/components/ui/tooltip";
@@ -106,6 +107,8 @@ export default function ArticleStationary({
     typeof totalCount === "number" &&
     totalCount > 1;
   const [isHovered, setIsHovered] = useState(false);
+  const alwaysShowControls = useBreakpointValue({ base: true, md: false }) ?? false;
+  const controlsVisible = alwaysShowControls || isHovered;
 
   // Pick a random loading message when loading starts
   const loadingMessage = useMemo(() => {
@@ -170,7 +173,7 @@ export default function ArticleStationary({
             position="absolute"
             top={3}
             right={3}
-            opacity={isHovered ? 1 : 0}
+            opacity={controlsVisible ? 1 : 0}
             transition="opacity 0.2s ease-in-out"
             gap={1}
           >
@@ -208,7 +211,7 @@ export default function ArticleStationary({
             justify="center"
             align="center"
             gap={1}
-            opacity={isHovered ? 1 : 0}
+            opacity={controlsVisible ? 1 : 0}
             transition="opacity 0.2s ease-in-out"
             userSelect="none"
             zIndex={1}
