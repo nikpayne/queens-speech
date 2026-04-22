@@ -19,7 +19,8 @@ interface UseGenerationReturn {
     userInput: string,
     mode: GenerationMode,
     sampleCount?: number,
-    modelTier?: ModelTier
+    modelTier?: ModelTier,
+    temperature?: number
   ) => Promise<void>;
   result: GenerationResult | null;
   isLoading: boolean;
@@ -42,7 +43,8 @@ export function useGeneration(options: UseGenerationOptions = {}): UseGeneration
     userInput: string,
     mode: GenerationMode,
     sampleCount = 1,
-    modelTier: ModelTier = "cheap"
+    modelTier: ModelTier = "cheap",
+    temperature = 0.5
   ) => {
     if (!userInput.trim()) {
       setResult({
@@ -68,6 +70,7 @@ export function useGeneration(options: UseGenerationOptions = {}): UseGeneration
           mode: mode,
           sampleCount,
           modelTier,
+          temperature,
         }),
       });
 

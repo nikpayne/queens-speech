@@ -2,7 +2,12 @@ import Anthropic from '@anthropic-ai/sdk';
 import type { ReferenceArticle } from './referencePicker';
 import { generateWritePrompt } from './writePrompt';
 import { generateRewritePrompt } from './rewritePrompt';
-import { DEFAULT_MODEL_TIER, MODEL_BY_TIER, type ModelTier } from './generationConfig';
+import {
+  DEFAULT_MODEL_TIER,
+  GENERATION_TEMPERATURE,
+  MODEL_BY_TIER,
+  type ModelTier,
+} from './generationConfig';
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -29,6 +34,7 @@ interface GenerationRequest {
   mode: GenerationMode;
   references: ReferenceArticle[];
   modelTier?: ModelTier;
+  temperature?: number;
   onChunk?: (chunk: string, isTitle: boolean) => void;
   /** Called once with the fully-built prompt before it's sent to the model. */
   onPrompt?: (prompt: string) => void;
@@ -42,7 +48,15 @@ interface GenerationResult {
 export async function generateQueenElizabethClickhole(
   request: GenerationRequest
 ): Promise<GenerationResult> {
-  const { userInput, mode, references, modelTier = DEFAULT_MODEL_TIER, onChunk, onPrompt } = request;
+  const {
+    userInput,
+    mode,
+    references,
+    modelTier = DEFAULT_MODEL_TIER,
+    temperature = GENERATION_TEMPERATURE,
+    onChunk,
+    onPrompt,
+  } = request;
   const model = MODEL_BY_TIER[modelTier];
 
   // Select the appropriate prompt based on mode
@@ -58,7 +72,7 @@ export async function generateQueenElizabethClickhole(
       const stream = await anthropic.messages.create({
         model,
         max_tokens: 3000,
-        temperature: 0.5,
+        temperature,
         stream: true,
         messages: [
           {
@@ -140,7 +154,7 @@ export async function generateQueenElizabethClickhole(
       const response = await anthropic.messages.create({
         model,
         max_tokens: 2500,
-        temperature: 0.8,
+        temperature,
         stream: false,
         messages: [
           {

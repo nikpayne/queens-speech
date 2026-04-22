@@ -23,7 +23,10 @@ import { useGeneration } from "@/hooks/useGeneration";
 import {
   DEFAULT_MODEL_TIER,
   DEFAULT_SAMPLE_COUNT,
+  GENERATION_TEMPERATURE,
+  MAX_TEMPERATURE,
   MAX_SAMPLE_COUNT,
+  MIN_TEMPERATURE,
   MODEL_BY_TIER,
   type ModelTier,
 } from "@/lib/generationConfig";
@@ -44,6 +47,7 @@ export default function Home() {
   const [sampleCount, setSampleCount] = useState(DEFAULT_SAMPLE_COUNT);
   // Runtime-only setting (not persisted): choose cheap vs fancy model tier.
   const [modelTier, setModelTier] = useState<ModelTier>(DEFAULT_MODEL_TIER);
+  const [temperature, setTemperature] = useState(GENERATION_TEMPERATURE);
   const hasShownConsoleHelp = useRef(false);
 
   // Use the generation hook
@@ -131,6 +135,22 @@ export default function Home() {
       console.log(`model tier updated to ${tier} (${MODEL_BY_TIER[tier]})`);
       return tier;
     };
+    const temp = (value: number) => {
+      if (
+        typeof value !== "number" ||
+        Number.isNaN(value) ||
+        value < MIN_TEMPERATURE ||
+        value > MAX_TEMPERATURE
+      ) {
+        console.warn(
+          `temp(n): n must be a number between ${MIN_TEMPERATURE} and ${MAX_TEMPERATURE}`
+        );
+        return temperature;
+      }
+      setTemperature(value);
+      console.log(`temperature updated to ${value}`);
+      return value;
+    };
     const showConsoleHelp = () => {
       console.log(
         `\n=== QUEEN'S SPEECH CONSOLE COMMANDS ===\n` +
@@ -138,10 +158,12 @@ export default function Home() {
           `reset()   -> clear generation history\n` +
           `samples(n)-> set few-shot sample count (1-${MAX_SAMPLE_COUNT})\n\n` +
           `model(t)  -> set model tier: "cheap" | "fancy"\n\n` +
+          `temp(n)   -> set temperature (${MIN_TEMPERATURE}-${MAX_TEMPERATURE})\n\n` +
           `Current settings:\n` +
           `modelTier=${modelTier}\n` +
           `model=${MODEL_BY_TIER[modelTier]}\n` +
           `sampleCount=${sampleCount}\n` +
+          `temperature=${temperature}\n` +
           `======================================\n`
       );
     };
@@ -150,12 +172,14 @@ export default function Home() {
       reset: typeof reset;
       samples: typeof samples;
       model: typeof model;
+      temp: typeof temp;
       commands: typeof showConsoleHelp;
     };
     w.debug = debug;
     w.reset = reset;
     w.samples = samples;
     w.model = model;
+    w.temp = temp;
     w.commands = showConsoleHelp;
     // Show discoverability/help once on first load.
     if (!hasShownConsoleHelp.current) {
@@ -167,9 +191,10 @@ export default function Home() {
       delete (window as unknown as { reset?: typeof reset }).reset;
       delete (window as unknown as { samples?: typeof samples }).samples;
       delete (window as unknown as { model?: typeof model }).model;
+      delete (window as unknown as { temp?: typeof temp }).temp;
       delete (window as unknown as { commands?: typeof showConsoleHelp }).commands;
     };
-  }, [sampleCount, modelTier]);
+  }, [sampleCount, modelTier, temperature]);
 
   // While a generation is streaming we show the live partial content. Once it
   // finishes (or whenever the user is just browsing), we show the entry from
@@ -263,7 +288,13 @@ export default function Home() {
                 // Start every run from the newest slot so we don't keep a stale
                 // "viewing older history" index while new content is generated.
                 setHistoryIndex(0);
-                handleGenerate(userInput, mode, sampleCount, modelTier);
+                handleGenerate(
+                  userInput,
+                  mode,
+                  sampleCount,
+                  modelTier,
+                  temperature
+                );
               }}
               isLoading={isLoading}
             />

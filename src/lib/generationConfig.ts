@@ -1,5 +1,8 @@
 export const DEFAULT_SAMPLE_COUNT = 2;
 export const MAX_SAMPLE_COUNT = 10;
+export const GENERATION_TEMPERATURE = 0.8;
+export const MIN_TEMPERATURE = 0;
+export const MAX_TEMPERATURE = 1;
 
 export type ModelTier = "cheap" | "fancy";
 

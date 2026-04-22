@@ -4,7 +4,10 @@ import { getAllReferences, pickRandomReferences } from '@/lib/referencePicker';
 import {
   DEFAULT_MODEL_TIER,
   DEFAULT_SAMPLE_COUNT,
+  GENERATION_TEMPERATURE,
+  MAX_TEMPERATURE,
   MAX_SAMPLE_COUNT,
+  MIN_TEMPERATURE,
   type ModelTier,
 } from '@/lib/generationConfig';
 
@@ -16,6 +19,7 @@ export async function POST(request: NextRequest) {
       mode = "write",
       sampleCount = DEFAULT_SAMPLE_COUNT,
       modelTier = DEFAULT_MODEL_TIER,
+      temperature = GENERATION_TEMPERATURE,
     } = body;
 
     if (!userInput || typeof userInput !== 'string') {
@@ -54,6 +58,18 @@ export async function POST(request: NextRequest) {
     if (modelTier !== 'cheap' && modelTier !== 'fancy') {
       return NextResponse.json(
         { error: 'modelTier must be "cheap" or "fancy"' },
+        { status: 400 }
+      );
+    }
+
+    if (
+      typeof temperature !== 'number' ||
+      Number.isNaN(temperature) ||
+      temperature < MIN_TEMPERATURE ||
+      temperature > MAX_TEMPERATURE
+    ) {
+      return NextResponse.json(
+        { error: `temperature must be between ${MIN_TEMPERATURE} and ${MAX_TEMPERATURE}` },
         { status: 400 }
       );
     }
@@ -101,6 +117,7 @@ export async function POST(request: NextRequest) {
             mode: mode as GenerationMode,
             references: relevantReferences,
             modelTier: modelTier as ModelTier,
+            temperature,
             onPrompt: (prompt: string) => {
               const data = { type: 'prompt', prompt };
               controller.enqueue(encoder.encode(`data: ${JSON.stringify(data)}\n\n`));
